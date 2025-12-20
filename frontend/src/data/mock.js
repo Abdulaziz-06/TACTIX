@@ -95,7 +95,7 @@ export const testimonials = [
 
 export const navLinks = [
   { name: "Features", href: "#features" },
-  { name: "How It Works", href: "#how-it-works" },
-  { name: "Predictions", href: "#predictions" },
-  { name: "Pricing", href: "#pricing" }
+  { name: "How It Works", href: "#how-it-works" }
+  // { name: "Predictions", href: "#predictions" },
+  // { name: "Pricing", href: "#pricing" }
 ];

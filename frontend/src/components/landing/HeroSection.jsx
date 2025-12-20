@@ -9,7 +9,7 @@ const HeroSection = () => {
   return (
     <section className="min-h-screen bg-black relative overflow-hidden pt-20">
       {/* Background Grid Pattern */}
-      <div 
+      <div
         className="absolute inset-0 opacity-[0.06]"
         style={{
           backgroundImage: `
@@ -47,14 +47,17 @@ const HeroSection = () => {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 mb-16">
-              <button className="group flex items-center justify-between gap-3 px-8 py-4 bg-[#00FFD1] text-black text-lg font-medium hover:bg-[rgba(0,255,209,0.1)] hover:text-[#00FFD1] transition-all duration-400 min-w-[220px]">
+              <button
+                onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                className="group flex items-center justify-between gap-3 px-8 py-4 bg-[#00FFD1] text-black text-lg font-medium hover:bg-[rgba(0,255,209,0.1)] hover:text-[#00FFD1] transition-all duration-400 min-w-[220px]"
+              >
                 Start Predicting
                 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
               </button>
-              <button className="group flex items-center justify-center gap-3 px-8 py-4 bg-white/10 text-white text-lg font-medium hover:bg-white hover:text-black transition-all duration-400">
+              {/* <button className="group flex items-center justify-center gap-3 px-8 py-4 bg-white/10 text-white text-lg font-medium hover:bg-white hover:text-black transition-all duration-400">
                 <Play size={18} fill="currentColor" />
                 Watch Demo
-              </button>
+              </button> */}
             </div>
 
             {/* Stats */}
