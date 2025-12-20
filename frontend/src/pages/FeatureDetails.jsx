@@ -41,23 +41,7 @@ const FeatureDetails = () => {
         );
     }
 
-    const sampleNews = [
-        {
-            title: "Chip Shortage",
-            content: "Global chip shortage worsens as key manufacturing hubs face power outages.",
-            tag: "TECH"
-        },
-        {
-            title: "Oil Volatility",
-            content: "Oil prices drop by 15% following surprise production increase announcement.",
-            tag: "MARKETS"
-        },
-        {
-            title: "Battery Breakthrough",
-            content: "New breakthrough in solid-state batteries promises 1000km range for EVs.",
-            tag: "ENERGY"
-        }
-    ];
+    const sampleNews = feature.sampleNews;
 
     const sendMessage = (text) => {
         if (!text.trim()) return;

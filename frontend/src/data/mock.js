@@ -9,14 +9,19 @@ export const features = [
     description: "Our core AI engine processes thousands of data streams to predict causal ripples. Ask the agent about any current event to see its predicted future impacts.",
     icon: "Zap",
     example: {
-      trigger: "Global Logistics Disruption",
+      trigger: "Global Lithium Supply Crunch",
       predictions: [
-        "Retail price surge in 2 weeks",
-        "Alternative route saturation",
-        "Short-term inventory hoarding",
-        "Shipping insurance rate hike"
+        "EV production targets missed by 15%",
+        "Battery replacement costs +25%",
+        "Legacy auto delaying EV rollout",
+        "Recycling startup funding boom"
       ]
-    }
+    },
+    sampleNews: [
+      { title: "Lithium Export Ban", content: "Major producer announces immediate ban on raw lithium exports.", tag: "POLICY" },
+      { title: "Gigafactory Paused", content: "Construction on Nevada battery plant halted due to supply uncertainty.", tag: "BUSINESS" },
+      { title: "Solid State Hype", content: "New research suggests sodium-ion alternatives could bypass lithium need.", tag: "TECH" }
+    ]
   },
   {
     id: 2,
@@ -26,14 +31,19 @@ export const features = [
     description: "Connect the dots between headlines and market movements. See how news ripples through sectors before it hits your portfolio.",
     icon: "TrendingUp",
     example: {
-      trigger: "Fed Rate Hike Announcement",
+      trigger: "EV Sector Market Correction",
       predictions: [
-        "Banking sector +3.2%",
-        "Tech growth stocks -4.1%",
-        "Real estate REITs -2.8%",
-        "Bond yields surge 0.5%"
+        "Pure-play EV stocks -12%",
+        "Lithium miners (ALB, LAC) +8.5%",
+        "Diversified auto (Toyota, Ford) stable",
+        "Battery tech ETF volume spike"
       ]
-    }
+    },
+    sampleNews: [
+      { title: "Miner Earnings Beat", content: "Lithium mining giant reports record Q3 profits on price surge.", tag: "EARNINGS" },
+      { title: "Auto Index Drop", content: "Global Auto Index falls 4% as EV production targets are slashed.", tag: "MARKETS" },
+      { title: "Green Energy ETF", content: "Heavy outflows from renewables ETFs as supply chain fears mount.", tag: "FUNDS" }
+    ]
   },
   {
     id: 3,
@@ -43,14 +53,19 @@ export const features = [
     description: "Hurricanes, earthquakes, wildfires—we map the cascade effect on supply chains, insurance, and infrastructure in real-time.",
     icon: "Zap",
     example: {
-      trigger: "Category 4 Hurricane Florida",
+      trigger: "Flash Floods in Key Mining Region",
       predictions: [
-        "Citrus prices +40% spike",
-        "Insurance claims $12B",
-        "Port closures 72+ hours",
-        "Tourism revenue -$890M"
+        "Extraction operations halted 21 days",
+        "Regional rail infrastructure damaged",
+        "Force majeure declared by suppliers",
+        "Local ecosystem remediation costs"
       ]
-    }
+    },
+    sampleNews: [
+      { title: "Dam Breach Warning", content: "Structural integrity warning issued for tailings dam in heavy rain zone.", tag: "ALERT" },
+      { title: "Rail Line Washout", content: "Main mineral transport corridor severed by flash flooding.", tag: "LOGISTICS" },
+      { title: "Insurance Moratorium", content: "Insurers pause new underwriting for mining projects in flood zones.", tag: "FINANCE" }
+    ]
   }
 ];
 
