@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Server, TrendingUp, Zap, ChevronRight, Share2, Download, Send, Bot, User, Sparkles } from 'lucide-react';
 import { features } from '../data/mock';
 import Header from '../components/landing/Header';
+import CausalGraph from '../components/CausalGraph';
 
 const iconMap = {
     Server: Server,
@@ -42,6 +43,7 @@ const FeatureDetails = () => {
     }
 
     const sampleNews = feature.sampleNews;
+    const graphLabels = feature.graphLabels;
 
     const sendMessage = (text) => {
         if (!text.trim()) return;
@@ -52,14 +54,44 @@ const FeatureDetails = () => {
 
         // Simulate AI response
         setTimeout(() => {
-            const responses = [
-                "Based on current data streams, this event will likely trigger a 15% increase in logistics costs within 48 hours.",
-                "I've mapped this to secondary impacts in the energy sector. Expect crude volatility reaching +3.4% by EOD.",
-                "Analysis complete. This aligns with the 'Cascade Effect 4' pattern seen in Q2. Confidence score: 92.8%.",
-                "Connecting the dots... This event has a 70% probability of affecting regional supply chains for at least 12 days."
+            let responses = [
+                {
+                    text: "Based on current data streams, this event will likely trigger a 15% increase in logistics costs within 48 hours.",
+                    hasGraph: false
+                },
+                {
+                    text: "I've mapped this to secondary impacts in the energy sector. Expect crude volatility reaching +3.4% by EOD.",
+                    hasGraph: false
+                }
             ];
-            const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-            setMessages(prev => [...prev, { role: 'assistant', content: randomResponse }]);
+
+            // Specific logic for the Generic / Electricity use case
+            if (feature.slug === 'event-predictor') {
+                responses = [
+                    {
+                        text: "This policy will never trend on social media, but it quietly decides the cost structure of the entire digital economy. I've mapped the downstream impact on data centers and startups.",
+                        hasGraph: true
+                    }
+                ];
+            }
+            // Default graph response for other pages if not generic
+            else {
+                responses.unshift({
+                    text: "I've generated a causal map for this event. As you can see, the initial trigger creates a three-pronged impact across Tech, Markets, and Social sentiment.",
+                    hasGraph: true
+                });
+            }
+
+            // For demo purposes, prefer the graph response if it's the first interaction or random (generic page always gets graph)
+            const responseObj = (messages.length < 3 || feature.slug === 'event-predictor')
+                ? responses[0]
+                : responses[Math.floor(Math.random() * responses.length)];
+
+            setMessages(prev => [...prev, {
+                role: 'assistant',
+                content: responseObj.text,
+                hasGraph: responseObj.hasGraph
+            }]);
             setIsTyping(false);
         }, 1500);
     };
@@ -108,8 +140,8 @@ const FeatureDetails = () => {
                             ))}
                         </div>
 
-                        {/* Chatbot Section - Lowered with mt-24 */}
-                        <div className="mt-24 bg-[#0A0A0A] border border-white/10 flex flex-col h-[700px] relative overflow-hidden shadow-2xl shadow-[#00FFD1]/5">
+                        {/* Chatbot Section - Lowered with mt-24, Increased height to h-[850px] */}
+                        <div className="mt-24 bg-[#0A0A0A] border border-white/10 flex flex-col h-[850px] relative overflow-hidden shadow-2xl shadow-[#00FFD1]/5">
                             {/* Chat Header */}
                             <div className="p-4 border-b border-white/10 flex items-center justify-between bg-black/20">
                                 <div className="flex items-center gap-3">
@@ -153,6 +185,14 @@ const FeatureDetails = () => {
                                             : 'bg-[#00FFD1]/5 text-white border border-[#00FFD1]/10 rounded-tl-none'
                                             }`}>
                                             <p className="text-base leading-relaxed">{msg.content}</p>
+
+                                            {/* Render Graph if message has it */}
+                                            {msg.hasGraph && (
+                                                <div className="mt-4 w-full">
+                                                    <CausalGraph labels={graphLabels} />
+                                                </div>
+                                            )}
+
                                             <span className="text-[10px] text-white/20 mt-2 block uppercase text-right">
                                                 {msg.role === 'user' ? 'Sent' : 'Agent Response'}
                                             </span>

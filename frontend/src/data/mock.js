@@ -9,19 +9,30 @@ export const features = [
     description: "Our core AI engine processes thousands of data streams to predict causal ripples. Ask the agent about any current event to see its predicted future impacts.",
     icon: "Zap",
     example: {
-      trigger: "Global Lithium Supply Crunch",
+      trigger: "State Electricity Tariff Restructuring",
       predictions: [
-        "EV production targets missed by 15%",
-        "Battery replacement costs +25%",
-        "Legacy auto delaying EV rollout",
-        "Recycling startup funding boom"
+        "Data center operating costs +12-15%",
+        "Cloud service pricing surge for end-users",
+        "Tech infra expansion delays (Q3-Q4)",
+        "Margin pressure on digital-first startups"
       ]
     },
     sampleNews: [
-      { title: "Lithium Export Ban", content: "Major producer announces immediate ban on raw lithium exports.", tag: "POLICY" },
-      { title: "Gigafactory Paused", content: "Construction on Nevada battery plant halted due to supply uncertainty.", tag: "BUSINESS" },
-      { title: "Solid State Hype", content: "New research suggests sodium-ion alternatives could bypass lithium need.", tag: "TECH" }
-    ]
+      { title: "Regulatory Note", content: "State regulator proposes revised peak-hour tariffs for heavy industry consumers.", tag: "POLICY" },
+      { title: "Grid Authority", content: "Proposal released to reduce commercial subsidies for Tier-1 consumers.", tag: "UTILITY" },
+      { title: "Consultation Paper", content: "Draft Consultation Paper 4B: Special energy pricing slabs for data parks.", tag: "DRAFT" }
+    ],
+    graphLabels: {
+      root: "Tariff Hike",
+      tl_mid: "Data Centers",
+      tl_leaf_1: "OpEx Surge",
+      tl_leaf_2: "Cloud Cost",
+      tr_mid: "Tech Market",
+      tr_leaf_1: "Stock Dip",
+      tr_leaf_2: "Capex Pause",
+      b_leaf_1: "Startups",
+      b_leaf_2: "End Users"
+    }
   },
   {
     id: 2,
@@ -31,18 +42,18 @@ export const features = [
     description: "Connect the dots between headlines and market movements. See how news ripples through sectors before it hits your portfolio.",
     icon: "TrendingUp",
     example: {
-      trigger: "EV Sector Market Correction",
+      trigger: "Packaging Materials Sector Rotation",
       predictions: [
-        "Pure-play EV stocks -12%",
-        "Lithium miners (ALB, LAC) +8.5%",
-        "Diversified auto (Toyota, Ford) stable",
-        "Battery tech ETF volume spike"
+        "Paper/Pulp stocks +18%",
+        "Oil & Gas chemical divisions -5%",
+        "Waste Management volume dip",
+        "Consumer goods margin squeeze"
       ]
     },
     sampleNews: [
-      { title: "Miner Earnings Beat", content: "Lithium mining giant reports record Q3 profits on price surge.", tag: "EARNINGS" },
-      { title: "Auto Index Drop", content: "Global Auto Index falls 4% as EV production targets are slashed.", tag: "MARKETS" },
-      { title: "Green Energy ETF", content: "Heavy outflows from renewables ETFs as supply chain fears mount.", tag: "FUNDS" }
+      { title: "Market Rally", content: "International Paper hits 52-week high on ban news.", tag: "MARKETS" },
+      { title: "Sector Downgrade", content: "Analysts downgrade petrochemical outlook to 'Sell' on lowered demand.", tag: "ANALYST" },
+      { title: "Commodity Spike", content: "Pulp futures surge 30% overnight as manufacturers hoard supply.", tag: "COMMODITIES" }
     ]
   },
   {
@@ -53,18 +64,18 @@ export const features = [
     description: "Hurricanes, earthquakes, wildfires—we map the cascade effect on supply chains, insurance, and infrastructure in real-time.",
     icon: "Zap",
     example: {
-      trigger: "Flash Floods in Key Mining Region",
+      trigger: "Accelerated Deforestation Activity",
       predictions: [
-        "Extraction operations halted 21 days",
-        "Regional rail infrastructure damaged",
-        "Force majeure declared by suppliers",
-        "Local ecosystem remediation costs"
+        "Primary forest loss +12%",
+        "Biodiversity corridor disruption",
+        "Soil erosion risk in logging zones",
+        "Water table stress"
       ]
     },
     sampleNews: [
-      { title: "Dam Breach Warning", content: "Structural integrity warning issued for tailings dam in heavy rain zone.", tag: "ALERT" },
-      { title: "Rail Line Washout", content: "Main mineral transport corridor severed by flash flooding.", tag: "LOGISTICS" },
-      { title: "Insurance Moratorium", content: "Insurers pause new underwriting for mining projects in flood zones.", tag: "FINANCE" }
+      { title: "Satellite Alert", content: "Real-time imaging detects massive clearing in boreal zones.", tag: "ALERT" },
+      { title: "Ecosystem Warning", content: "Biologists warn of critical habitat loss from sudden paper demand.", tag: "ENV" },
+      { title: "Flood Risk", content: "Logging-induced soil instability raises regional flash flood risk.", tag: "CALAMITY" }
     ]
   }
 ];
@@ -77,6 +88,15 @@ export const nodeConnections = [
       { name: "Direct Impact", children: ["Companies", "Services", "Markets"] },
       { name: "Secondary Effects", children: ["Supply Chain", "Employment", "Consumer"] },
       { name: "Tertiary Ripples", children: ["Policy", "Sentiment", "Long-term"] }
+    ]
+  },
+  {
+    id: 2,
+    parent: "Policy Change",
+    children: [
+      { name: "Market Shift", children: ["Commodities", "Stocks", "Currency"] },
+      { name: "Environmental Cost", children: ["Resources", "Habitats", "Climate"] },
+      { name: "Social Response", children: ["Adoption", "Protest", "Lifestyle"] }
     ]
   }
 ];
