@@ -4,6 +4,9 @@ import { ArrowLeft, Server, TrendingUp, Zap, ChevronRight, Share2, Download, Sen
 import { features } from '../data/mock';
 import Header from '../components/landing/Header';
 import CausalGraph from '../components/CausalGraph';
+import axios from 'axios';
+
+
 
 const iconMap = {
     Server: Server,
@@ -43,57 +46,59 @@ const FeatureDetails = () => {
     }
 
     const sampleNews = feature.sampleNews;
-    const graphLabels = feature.graphLabels;
 
-    const sendMessage = (text) => {
+
+    const sendMessage = async (text) => {
         if (!text.trim()) return;
 
         const userMessage = { role: 'user', content: text };
         setMessages(prev => [...prev, userMessage]);
         setIsTyping(true);
 
-        // Simulate AI response
-        setTimeout(() => {
-            let responses = [
-                {
-                    text: "Based on current data streams, this event will likely trigger a 15% increase in logistics costs within 48 hours.",
-                    hasGraph: false
-                },
-                {
-                    text: "I've mapped this to secondary impacts in the energy sector. Expect crude volatility reaching +3.4% by EOD.",
-                    hasGraph: false
-                }
-            ];
+        try {
+            // Using the user-provided backend URL directly to ensure correctness
+            const backendUrl = "https://tactixbackend.onrender.com";
+            const response = await axios.post(`${backendUrl}/chat`, {
+                question: text
+            });
 
-            // Specific logic for the Generic / Electricity use case
-            if (feature.slug === 'event-predictor') {
-                responses = [
-                    {
-                        text: "This policy will never trend on social media, but it quietly decides the cost structure of the entire digital economy. I've mapped the downstream impact on data centers and startups.",
-                        hasGraph: true
-                    }
-                ];
-            }
-            // Default graph response for other pages if not generic
-            else {
-                responses.unshift({
-                    text: "I've generated a causal map for this event. As you can see, the initial trigger creates a three-pronged impact across Tech, Markets, and Social sentiment.",
-                    hasGraph: true
-                });
-            }
+            const data = response.data;
 
-            // For demo purposes, prefer the graph response if it's the first interaction or random (generic page always gets graph)
-            const responseObj = (messages.length < 3 || feature.slug === 'event-predictor')
-                ? responses[0]
-                : responses[Math.floor(Math.random() * responses.length)];
+            // Build a highly detailed gist if the backend doesn't provide one
+            let summaryGist = data.summary || data.gist;
+
+            if (!summaryGist && data.graph) {
+                const signals = data.graph.nodes.filter(n => n.label === 'SIGNAL').map(n => n.description);
+                const impacts = data.graph.nodes.filter(n => n.label === 'IMPACT').map(n => n.description);
+                const predictions = data.graph.nodes.filter(n => n.label === 'PREDICTION').map(n => n.description);
+
+                summaryGist = `Primary triggers include ${signals.length > 0 ? signals.join(' and ') : 'unspecified signals'}. `;
+                summaryGist += `This event is projected to lead to ${impacts.length > 0 ? impacts.slice(0, 2).join(', ') : 'several key impacts'}, causing significant ripples across the system. `;
+                summaryGist += `Long-term forecasts suggest ${predictions.length > 0 ? predictions[0] : 'progressive structural shifts'} as the final causal outcome.`;
+            } else if (!summaryGist) {
+                summaryGist = `I've analyzed the causal ripples for your query. This ${data.category} analysis identifies ${data.graph?.nodes?.length || 0} key factors and their dependencies.`;
+            }
 
             setMessages(prev => [...prev, {
                 role: 'assistant',
-                content: responseObj.text,
-                hasGraph: responseObj.hasGraph
+                content: "I've processed the news stream and generated a specialized causal impact map for your query.",
+                gist: summaryGist,
+                headline: data.headline, // Capture the headline from the API
+                graphData: data.graph,
+                hasGraph: true
             }]);
+        } catch (error) {
+            console.error("Error fetching AI response:", error);
+
+            // Fallback to mock behavior if API fails, or show error
+            setMessages(prev => [...prev, {
+                role: 'assistant',
+                content: "I encountered an error connecting to the intelligence stream. Please ensure the backend is active.",
+                hasGraph: false
+            }]);
+        } finally {
             setIsTyping(false);
-        }, 1500);
+        }
     };
 
     const handleSendMessage = (e) => {
@@ -185,13 +190,17 @@ const FeatureDetails = () => {
                                             : 'bg-[#00FFD1]/5 text-white border border-[#00FFD1]/10 rounded-tl-none'
                                             }`}>
                                             <p className="text-base leading-relaxed">{msg.content}</p>
-
-                                            {/* Render Graph if message has it */}
-                                            {msg.hasGraph && (
-                                                <div className="mt-4 w-full">
-                                                    <CausalGraph labels={graphLabels} />
+                                            {msg.graphData && (
+                                                <div className="mt-4">
+                                                    <CausalGraph
+                                                        data={msg.graphData}
+                                                        gist={msg.gist}
+                                                        headline={msg.headline}
+                                                    />
                                                 </div>
                                             )}
+
+
 
                                             <span className="text-[10px] text-white/20 mt-2 block uppercase text-right">
                                                 {msg.role === 'user' ? 'Sent' : 'Agent Response'}

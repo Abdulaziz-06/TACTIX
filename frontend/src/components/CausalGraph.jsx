@@ -1,132 +1,259 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useMemo, useState, memo, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Maximize2, Info, X, Plus, Minus, RotateCcw } from 'lucide-react';
 
-const CausalGraph = ({ labels }) => {
-    // Hardcoded coordinates to match the Y-shape "Mercedes" style layout from the user's image
-    // Center is roughly 400, 300 in an 800x600 viewBox
-    const nodes = [
-        { id: 'root', x: 400, y: 350, label: labels?.root || 'Social Impact', type: 'root' },
+const CATEGORY_COLORS = {
+    SIGNAL: '#00FFD1',     // Cyan
+    DEPENDENCY: '#FACC15', // Yellow
+    IMPACT: '#F87171',     // Red/Coral
+    PREDICTION: '#A78BFA'  // Purple
+};
 
-        // Top Left Branch
-        { id: 'tl-mid', x: 250, y: 250, label: labels?.tl_mid || 'Tech Impact', type: 'mid' },
-        { id: 'tl-leaf-1', x: 180, y: 180, label: labels?.tl_leaf_1 || 'Services', type: 'leaf' },
-        { id: 'tl-leaf-2', x: 320, y: 150, label: labels?.tl_leaf_2 || 'Infrastructure', type: 'leaf' },
+// --------------------------------------------------------------------------
+// MEMOIZED EDGE COMPONENT
+// --------------------------------------------------------------------------
+const Edge = memo(({ start, end, isFull }) => {
+    return (
+        <motion.path
+            d={`M ${start.x} ${start.y} L ${end.x} ${end.y}`}
+            stroke="rgba(0, 255, 209, 0.3)"
+            strokeWidth="2"
+            fill="none"
+            markerEnd={`url(#arrowhead-${isFull ? 'full' : 'compact'})`}
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: 1 }}
+            transition={{ duration: 0.8 }}
+        />
+    );
+});
 
-        // Top Right Branch
-        { id: 'tr-mid', x: 550, y: 250, label: labels?.tr_mid || 'Market Effect', type: 'mid' },
-        { id: 'tr-leaf-1', x: 620, y: 180, label: labels?.tr_leaf_1 || 'Commodities', type: 'leaf' },
-        { id: 'tr-leaf-2', x: 480, y: 150, label: labels?.tr_leaf_2 || 'Stocks', type: 'leaf' },
-
-        // Bottom Branch
-        { id: 'b-leaf-1', x: 320, y: 480, label: labels?.b_leaf_1 || 'Employment', type: 'leaf' },
-        { id: 'b-leaf-2', x: 480, y: 480, label: labels?.b_leaf_2 || 'Sentiment', type: 'leaf' },
-    ];
-
-    const links = [
-        // Center connections (The Y shape is implied by connecting to the mids but let's connect explicit layout)
-        { source: 'root', target: 'tl-mid' },
-        { source: 'root', target: 'tr-mid' },
-
-        // Top Left Branch
-        { source: 'tl-mid', target: 'tl-leaf-1' },
-        { source: 'tl-mid', target: 'tl-leaf-2' },
-
-        // Top Right Branch
-        { source: 'tr-mid', target: 'tr-leaf-1' },
-        { source: 'tr-mid', target: 'tr-leaf-2' },
-
-        // Bottom Branch (connected directly to root for the Y shape bottom legs?)
-        // Looking at the image, there's a central hub.
-        // Actually, looking closely at the image:
-        // There is a central point, then 3 arms.
-        // Arm 1 (Left-Up): Tech Impact -> Services / Infrastructure
-        // Arm 2 (Right-Up): Market Effect -> Stocks / Commods
-        // Arm 3 (Down): Social Impact -> Employment / Sentiment
-        // Wait, the image has a CENTER node that is just a junction, then it goes to the labelled nodes?
-        // Let's refine based on the "Social Impact" label in the image which is at the BOTTOM junction.
-        // Actually the image has a central 3-way split. 
-        // Let's model a central invisible hub or just connect them.
-        // I'll stick to a visual hierarchy that looks good.
-
-        { source: 'root', target: 'b-leaf-1' },
-        { source: 'root', target: 'b-leaf-2' }
-    ];
+// --------------------------------------------------------------------------
+// NODE COMPONENT WITH INTERNAL STATE
+// --------------------------------------------------------------------------
+const Node = memo(({ node, pos, isFull, isTopRow }) => {
+    const [isHovered, setIsHovered] = useState(false);
+    const nodeSize = isFull ? "w-28 h-28" : "w-20 h-20";
+    const displayName = node.id.replace(/_/g, ' ');
 
     return (
-        <div className="w-full h-[400px] bg-black/50 rounded-lg border border-[#00FFD1]/20 relative overflow-hidden my-4 backdrop-blur-sm">
-            <svg className="w-full h-full" viewBox="0 0 800 600">
+        <div
+            className="absolute"
+            style={{
+                left: pos.x,
+                top: pos.y,
+                transform: 'translate(-50%, -50%)',
+                zIndex: isHovered ? 1000 : 10,
+                willChange: 'transform' // Performance optimization
+            }}
+        >
+            {/* Hover Tooltip */}
+            <AnimatePresence>
+                {isHovered && (
+                    <motion.div
+                        initial={{ opacity: 0, y: isTopRow ? -5 : 5 }}
+                        animate={{ opacity: 1, y: isTopRow ? 15 : -15 }}
+                        exit={{ opacity: 0 }}
+                        className={`absolute left-1/2 -translate-x-1/2 w-[320px] p-5 bg-[#0A0A0A] border-2 border-white/10 rounded-sm shadow-[0_30px_60px_-12px_rgba(0,0,0,1)] z-[1001] pointer-events-none ${isTopRow ? 'top-full mt-4' : 'bottom-full mb-4'
+                            }`}
+                    >
+                        <div className="flex flex-col gap-2">
+                            <div className="flex items-center justify-between border-b border-white/5 pb-2 mb-2">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: CATEGORY_COLORS[node.label] }} />
+                                    <span className="text-[10px] font-black text-white/50 uppercase tracking-widest">{node.label}</span>
+                                </div>
+                                <span className="text-[9px] text-white/20 font-mono italic">{displayName}</span>
+                            </div>
+                            <p className="text-[13px] text-white/80 leading-relaxed font-medium">
+                                {node.description.replace(/_/g, ' ')}
+                            </p>
+                        </div>
+                        <div className={`absolute left-1/2 -translate-x-1/2 border-[10px] border-transparent ${isTopRow ? 'bottom-full border-b-[#0A0A0A]' : 'top-full border-t-[#0A0A0A]'
+                            }`} />
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Node Circle */}
+            <div
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                className="relative flex flex-col items-center cursor-crosshair"
+            >
+                <div
+                    className={`${nodeSize} rounded-full border-2 flex items-center justify-center transition-all duration-300 ${isHovered ? 'shadow-[0_0_50px_rgba(255,255,255,0.1)] scale-110' : ''
+                        }`}
+                    style={{
+                        backgroundColor: '#030303',
+                        borderColor: CATEGORY_COLORS[node.label]
+                    }}
+                >
+                    <span className={`font-bold text-white/70 text-center px-4 overflow-hidden break-words line-clamp-3 ${isFull ? 'text-[11px]' : 'text-[9px]'}`}>
+                        {displayName}
+                    </span>
+                </div>
+                {node.label === 'SIGNAL' && (
+                    <span className="absolute inset-0 rounded-full border border-[#00FFD1] animate-ping opacity-10 pointer-events-none" />
+                )}
+            </div>
+        </div>
+    );
+});
+
+// --------------------------------------------------------------------------
+// MAIN GRAPH COMPONENT
+// --------------------------------------------------------------------------
+const CausalGraph = ({ data, gist, headline }) => {
+    const { nodes, edges } = data || { nodes: [], edges: [] };
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const [zoom, setZoom] = useState(1);
+
+    // Group nodes by category
+    const columns = useMemo(() => {
+        const cols = { SIGNAL: [], DEPENDENCY: [], IMPACT: [], PREDICTION: [] };
+        nodes.forEach(node => {
+            if (cols[node.label]) cols[node.label].push(node);
+        });
+        return cols;
+    }, [nodes]);
+
+    const columnOrder = ['SIGNAL', 'DEPENDENCY', 'IMPACT', 'PREDICTION'];
+
+    const nodePositions = useMemo(() => {
+        const positions = {};
+        const colWidth = 400;
+        const rowHeight = 240;
+        const paddingX = 120;
+        const paddingY = 120;
+
+        columnOrder.forEach((label, colIdx) => {
+            const colNodes = columns[label] || [];
+            colNodes.forEach((node, rowIdx) => {
+                positions[node.id] = {
+                    x: paddingX + colIdx * colWidth,
+                    y: paddingY + rowIdx * rowHeight
+                };
+            });
+        });
+        return positions;
+    }, [columns]);
+
+    const graphWidth = 1600;
+    const maxHeight = useMemo(() => {
+        const counts = columnOrder.map(label => (columns[label] || []).length);
+        const maxNodes = Math.max(...counts, 1);
+        return maxNodes * 240 + 250;
+    }, [columns]);
+
+    const handleZoomIn = useCallback(() => setZoom(prev => Math.min(prev + 0.2, 2)), []);
+    const handleZoomOut = useCallback(() => setZoom(prev => Math.max(prev - 0.2, 0.4)), []);
+    const handleResetZoom = useCallback(() => setZoom(1), []);
+
+    if (!nodes.length) return null;
+
+    const GraphContent = ({ isFull }) => (
+        <div
+            className="transition-transform duration-300 ease-out origin-top-left"
+            style={{
+                width: `${graphWidth}px`,
+                height: `${maxHeight}px`,
+                transform: `scale(${isFull ? zoom : 0.8})`
+            }}
+        >
+            <svg className="absolute inset-0 w-full h-full pointer-events-none">
                 <defs>
-                    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                        <feGaussianBlur stdDeviation="4" result="coloredBlur" />
-                        <feMerge>
-                            <feMergeNode in="coloredBlur" />
-                            <feMergeNode in="SourceGraphic" />
-                        </feMerge>
-                    </filter>
+                    <marker id={`arrowhead-${isFull ? 'full' : 'compact'}`} markerWidth="10" markerHeight="7" refX={isFull ? "52" : "45"} refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="rgba(0, 255, 209, 0.4)" />
+                    </marker>
                 </defs>
-
-                {/* Lines */}
-                {links.map((link, i) => {
-                    const s = nodes.find(n => n.id === link.source);
-                    const t = nodes.find(n => n.id === link.target);
-                    return (
-                        <motion.line
-                            key={i}
-                            initial={{ pathLength: 0, opacity: 0 }}
-                            animate={{ pathLength: 1, opacity: 1 }}
-                            transition={{ duration: 1, delay: i * 0.1 }}
-                            x1={s.x}
-                            y1={s.y}
-                            x2={t.x}
-                            y2={t.y}
-                            stroke="#00FFD1"
-                            strokeWidth="2"
-                            strokeOpacity="0.5"
-                        />
-                    );
-                })}
-
-                {/* Nodes */}
-                {nodes.map((node, i) => (
-                    <g key={node.id}>
-                        <motion.circle
-                            initial={{ scale: 0, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ duration: 0.5, delay: 0.5 + (i * 0.1) }}
-                            cx={node.x}
-                            cy={node.y}
-                            r={node.type === 'root' ? 20 : 15}
-                            fill="#000"
-                            stroke="#00FFD1"
-                            strokeWidth="3"
-                            filter="url(#glow)"
-                            className="cursor-pointer hover:fill-[#00FFD1]/20 transition-colors"
-                        />
-                        {/* Inner dot */}
-                        {/* Connecting dots on lines */}
-
-                        <motion.text
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 1 + (i * 0.1) }}
-                            x={node.x}
-                            y={node.y + 40}
-                            textAnchor="middle"
-                            fill="white"
-                            fontSize="14"
-                            className="font-sans font-medium tracking-wide"
-                            style={{ textShadow: '0 0 10px rgba(0,255,209,0.5)' }}
-                        >
-                            {node.label}
-                        </motion.text>
-                    </g>
+                {edges.map((edge) => (
+                    <Edge key={`${edge.from}-${edge.to}`} start={nodePositions[edge.from]} end={nodePositions[edge.to]} isFull={isFull} />
                 ))}
             </svg>
 
-            <div className="absolute top-4 right-4 flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-[#00FFD1] animate-pulse" />
-                <span className="text-[#00FFD1] text-xs font-mono uppercase">Interconnected Data Map</span>
+            {columnOrder.map((label, colIdx) => (
+                <div key={label} className="absolute border-b border-white/5 pb-2" style={{ left: colIdx * 400 + 40, width: '250px', top: 40 }}>
+                    <span className="text-[12px] font-black tracking-[0.6em] text-white/30 uppercase">{label}</span>
+                </div>
+            ))}
+
+            {nodes.map((node) => {
+                const labelNodes = columns[node.label] || [];
+                const rowIdx = labelNodes.findIndex(n => n.id === node.id);
+                return (
+                    <Node
+                        key={node.id}
+                        node={node}
+                        pos={nodePositions[node.id]}
+                        isFull={isFull}
+                        isTopRow={rowIdx === 0}
+                    />
+                );
+            })}
+        </div>
+    );
+
+    return (
+        <div className="mt-8 relative group">
+            {!isFullscreen && gist && (
+                <div className="mb-6 bg-white/[0.02] border-l-4 border-[#00FFD1] p-6 rounded-r-md">
+                    <p className="text-[15px] text-white/80 leading-relaxed font-medium italic">"{gist}"</p>
+                </div>
+            )}
+
+            <div className="absolute top-2 right-2 z-40">
+                <button onClick={() => setIsFullscreen(true)} className="p-2.5 bg-black/50 border border-white/10 hover:border-[#00FFD1]/50 text-white/40 hover:text-[#00FFD1] transition-all rounded-sm backdrop-blur-md">
+                    <Maximize2 size={18} />
+                </button>
             </div>
+
+            <div className="p-10 bg-[#020202] border border-white/5 rounded-sm overflow-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent h-[500px]">
+                <GraphContent isFull={false} />
+            </div>
+
+            {/* Eye-catching Headline */}
+            {headline && (
+                <div className="mt-6 p-4 border-t border-red-500/20 bg-red-500/5 rounded-sm flex flex-col items-center gap-1.5">
+                    <span className="text-[11px] font-black text-white/70 uppercase tracking-[0.5em] drop-shadow-[0_0_8px_rgba(255,255,255,0.1)]">Probable Headline</span>
+                    <p className="text-red-500 text-lg font-bold italic tracking-wide text-center drop-shadow-[0_0_10px_rgba(239,68,68,0.3)] animate-pulse">
+                        {headline}
+                    </p>
+                </div>
+            )}
+
+            <div className="mt-4 flex items-center gap-2 text-white/20 text-[10px] uppercase font-bold tracking-[0.2em]">
+                <Info size={12} />
+                Interactive Map • Scroll to explore depths
+            </div>
+
+            <AnimatePresence>
+                {isFullscreen && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] bg-black flex flex-col">
+                        <div className="p-6 border-b border-white/5 flex items-center justify-between bg-black/90 backdrop-blur-3xl">
+                            <div className="flex items-center gap-5">
+                                <h3 className="text-white font-bold uppercase tracking-[0.4em] text-sm">Causal Impact Analysis</h3>
+                                <div className="h-4 w-px bg-white/10" />
+                                <div className="flex items-center gap-1">
+                                    <button onClick={handleZoomOut} className="p-2 text-white/40 hover:text-white transition-colors" title="Zoom Out"><Minus size={18} /></button>
+                                    <span className="text-[11px] font-mono text-white/60 min-w-[3em] text-center">{Math.round(zoom * 100)}%</span>
+                                    <button onClick={handleZoomIn} className="p-2 text-white/40 hover:text-white transition-colors" title="Zoom In"><Plus size={18} /></button>
+                                    <button onClick={handleResetZoom} className="p-2 text-white/40 hover:text-white transition-colors ml-2" title="Reset Zoom"><RotateCcw size={16} /></button>
+                                </div>
+                            </div>
+                            <button onClick={() => setIsFullscreen(false)} className="p-2 text-white/40 hover:text-red-500 transition-all">
+                                <X size={32} />
+                            </button>
+                        </div>
+                        <div className="flex-1 overflow-auto p-20 bg-[#010101] scrollbar-hide">
+                            <GraphContent isFull={true} />
+                        </div>
+                        <div className="p-5 border-t border-white/5 bg-black text-[10px] text-white/20 flex justify-between uppercase tracking-widest px-8 font-black">
+                            <span>Analysis Engine Active</span>
+                            <span>Scale {zoom.toFixed(1)}x • Nodes {nodes.length}</span>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

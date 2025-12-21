@@ -18,21 +18,11 @@ export const features = [
       ]
     },
     sampleNews: [
-      { title: "Regulatory Note", content: "State regulator proposes revised peak-hour tariffs for heavy industry consumers.", tag: "POLICY" },
-      { title: "Grid Authority", content: "Proposal released to reduce commercial subsidies for Tier-1 consumers.", tag: "UTILITY" },
-      { title: "Consultation Paper", content: "Draft Consultation Paper 4B: Special energy pricing slabs for data parks.", tag: "DRAFT" }
+      { title: "Dependent on only a single source for raw materials", content: "What national security risks arise from relying on a single source for defense raw materials during war?", tag: "Raw Materials" },
+      { title: "Discovery of a new oil reserve in the country", content: "How can a major oil discovery lower exposure to global price shocks while raising risks of local displacement?", tag: "Natural Resources" },
+      { title: "Ukraine unable to recieve raw materials for weapons manufacture from U.S", content: "Why is a Ukrainian weapons company unable to obtain raw materials from the US?", tag: "War Time" }
     ],
-    graphLabels: {
-      root: "Tariff Hike",
-      tl_mid: "Data Centers",
-      tl_leaf_1: "OpEx Surge",
-      tl_leaf_2: "Cloud Cost",
-      tr_mid: "Tech Market",
-      tr_leaf_1: "Stock Dip",
-      tr_leaf_2: "Capex Pause",
-      b_leaf_1: "Startups",
-      b_leaf_2: "End Users"
-    }
+
   },
   {
     id: 2,
@@ -51,9 +41,9 @@ export const features = [
       ]
     },
     sampleNews: [
-      { title: "Market Rally", content: "International Paper hits 52-week high on ban news.", tag: "MARKETS" },
-      { title: "Sector Downgrade", content: "Analysts downgrade petrochemical outlook to 'Sell' on lowered demand.", tag: "ANALYST" },
-      { title: "Commodity Spike", content: "Pulp futures surge 30% overnight as manufacturers hoard supply.", tag: "COMMODITIES" }
+      { title: "Trade Tensions Between India and China", content: "How do trade tensions with China cause supply shocks in both pharma and electronics?", tag: "Market" },
+      { title: "Single MNC takes over the new oil reserve found in the country", content: "What risks arise from regulatory capture if one firm controls a national oil reserve?", tag: "Natural Resources" },
+      { title: "Increased military readiness at the border", content: "How does increased border military readiness create immediate risks for global trade and stock markets?", tag: "Military" }
     ]
   },
   {
@@ -73,9 +63,9 @@ export const features = [
       ]
     },
     sampleNews: [
-      { title: "Satellite Alert", content: "Real-time imaging detects massive clearing in boreal zones.", tag: "ALERT" },
-      { title: "Ecosystem Warning", content: "Biologists warn of critical habitat loss from sudden paper demand.", tag: "ENV" },
-      { title: "Flood Risk", content: "Logging-induced soil instability raises regional flash flood risk.", tag: "CALAMITY" }
+      { title: "Earthquake in Delhi-NCR", content: "How do secondary hazards like gas fires and liquefaction worsen the humanitarian impact of a Delhi NCR earthquake?", tag: " Natural Phenomenon" },
+      { title: "High import of goods for production of food", content: "What economic risks does India face if food shortages lead to heavy dependence on imports?", tag: "Famine" },
+      { title: "Flood Risk", content: "How does damage to transport infrastructure hinder emergency rescue operations after a disaster?", tag: "Flood" }
     ]
   }
 ];
@@ -102,7 +92,7 @@ export const nodeConnections = [
 ];
 
 export const stats = [
-  { value: "2.4s", label: "Avg. Prediction Time" },
+  { value: "6.3s", label: "Avg. Prediction Time" },
   { value: "94%", label: "Accuracy Rate" },
   { value: "10K+", label: "Factors Analyzed" },
   { value: "0", label: "Ads. Ever." }
