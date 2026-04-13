@@ -1,0 +1,29 @@
+# dependencies
+node_modules/
+
+# build
+dist/
+build/
+
+# env
+.env*
+
+# logs
+*.log
+
+# system
+.DS_Store
+
+# editor
+.vscode/
+.idea/
+
+# typescript
+*.tsbuildinfo
+
+# vite
+.vite
+
+# your extras
+ts_out.txt
+tsc-errors.txt
