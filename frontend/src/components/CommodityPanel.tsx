@@ -50,11 +50,11 @@ export default function CommodityPanel() {
 
   const latestCrude = crudeInv?.weeks?.[0]
   const prevCrude = crudeInv?.weeks?.[1]
-  const crudeChange = latestCrude && prevCrude ? latestCrude.value - prevCrude.value : 0
+  const crudeChange = latestCrude && prevCrude ? latestCrude.stocksMb - prevCrude.stocksMb : 0
 
   const latestGas = natGasStorage?.weeks?.[0]
   const prevGas = natGasStorage?.weeks?.[1]
-  const gasChange = latestGas && prevGas ? latestGas.value - prevGas.value : 0
+  const gasChange = latestGas && prevGas ? latestGas.storBcf - prevGas.storBcf : 0
 
   const handleItemClick = async (itemLabel: string) => {
     setAnalyzing(itemLabel)
@@ -198,7 +198,7 @@ Return as high-fidelity JSON.`
                 <div className="flex items-center justify-between">
                    <div className="flex flex-col">
                       <span className="text-xl font-black tracking-tighter text-white">
-                        {latestCrude ? `${(latestCrude.value / 1000).toFixed(1)}M` : '---'}
+                        {latestCrude ? `${(latestCrude.stocksMb / 1000).toFixed(1)}M` : '---'}
                       </span>
                       <span className={`text-[9px] font-black ${crudeChange > 0 ? 'text-[#ff3333]' : 'text-[#00ff88]'}`}>
                         {crudeChange > 0 ? '+' : ''}{(crudeChange).toFixed(1)}k WoW
@@ -232,7 +232,7 @@ Return as high-fidelity JSON.`
                 <div className="flex items-center justify-between">
                    <div className="flex flex-col">
                       <span className="text-xl font-black tracking-tighter text-white">
-                        {latestGas?.value || '---'} Bcf
+                        {latestGas?.storBcf || '---'} Bcf
                       </span>
                       <span className={`text-[9px] font-black ${gasChange > 0 ? 'text-[#ff3333]' : 'text-[#00ff88]'}`}>
                         {gasChange > 0 ? '+' : ''}{gasChange} Bcf WoW

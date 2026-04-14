@@ -16,15 +16,17 @@
     --secondary-foreground: 0 0% 98%;
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
-    --accent: 35 100% 50%; /* Bloomberg Amber */
+    --accent: 35 100% 50%;
+    /* Bloomberg Amber */
     --accent-foreground: 0 0% 0%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
-    --radius: 0rem; /* Sharp edges for tactical look */
-    
+    --radius: 0rem;
+    /* Sharp edges for tactical look */
+
     /* Custom Tactical Colors */
     --tactical-bg: #050505;
     --tactical-panel: #0a0a0a;
@@ -41,6 +43,7 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "tnum" on, "lnum" on;
@@ -94,8 +97,13 @@
 
 /* Tactical Animations */
 @keyframes scanline {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(100%); }
+  0% {
+    transform: translateY(-100%);
+  }
+
+  100% {
+    transform: translateY(100%);
+  }
 }
 
 .scanline::after {
@@ -116,8 +124,17 @@
 }
 
 @keyframes pulse-tactical {
-  0%, 100% { opacity: 1; filter: brightness(1); }
-  50% { opacity: 0.7; filter: brightness(1.2); }
+
+  0%,
+  100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+
+  50% {
+    opacity: 0.7;
+    filter: brightness(1.2);
+  }
 }
 
 .animate-tactical {
@@ -125,35 +142,82 @@
 }
 
 /* Text Highlights */
-.text-tactical-amber { color: var(--tactical-amber); }
-.text-tactical-blue { color: var(--tactical-blue); }
-.text-tactical-green { color: var(--tactical-green); }
-.text-tactical-red { color: var(--tactical-red); }
-.text-tactical-cyan { color: var(--tactical-cyan); }
+.text-tactical-amber {
+  color: var(--tactical-amber);
+}
 
-.bg-tactical-amber { background-color: var(--tactical-amber); }
-.bg-tactical-blue { background-color: var(--tactical-blue); }
-.bg-tactical-green { background-color: var(--tactical-green); }
-.bg-tactical-red { background-color: var(--tactical-red); }
+.text-tactical-blue {
+  color: var(--tactical-blue);
+}
+
+.text-tactical-green {
+  color: var(--tactical-green);
+}
+
+.text-tactical-red {
+  color: var(--tactical-red);
+}
+
+.text-tactical-cyan {
+  color: var(--tactical-cyan);
+}
+
+.bg-tactical-amber {
+  background-color: var(--tactical-amber);
+}
+
+.bg-tactical-blue {
+  background-color: var(--tactical-blue);
+}
+
+.bg-tactical-green {
+  background-color: var(--tactical-green);
+}
+
+.bg-tactical-red {
+  background-color: var(--tactical-red);
+}
 
 /* Border Glows */
-.border-tactical-amber { border-color: rgba(255, 170, 0, 0.3); }
-.border-tactical-blue { border-color: rgba(0, 136, 255, 0.3); }
-.border-tactical-green { border-color: rgba(0, 255, 136, 0.3); }
+.border-tactical-amber {
+  border-color: rgba(255, 170, 0, 0.3);
+}
+
+.border-tactical-blue {
+  border-color: rgba(0, 136, 255, 0.3);
+}
+
+.border-tactical-green {
+  border-color: rgba(0, 255, 136, 0.3);
+}
 
 /* Glow Effects */
-.glow-amber { text-shadow: 0 0 10px rgba(255, 170, 0, 0.5); }
-.glow-blue { text-shadow: 0 0 10px rgba(0, 136, 255, 0.5); }
-.glow-green { text-shadow: 0 0 10px rgba(0, 255, 136, 0.5); }
-.glow-primary { text-shadow: 0 0 15px rgba(var(--primary), 0.6); }
+.glow-amber {
+  text-shadow: 0 0 10px rgba(255, 170, 0, 0.5);
+}
+
+.glow-blue {
+  text-shadow: 0 0 10px rgba(0, 136, 255, 0.5);
+}
+
+.glow-green {
+  text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+.glow-primary {
+  text-shadow: 0 0 15px rgba(var(--primary), 0.6);
+}
 
 /* Custom Animations */
 @keyframes ping-primary {
-  75%, 100% {
+
+  75%,
+  100% {
     transform: scale(2);
     opacity: 0;
   }
 }
+
 .animate-ping-primary {
   animation: ping-primary 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
 }

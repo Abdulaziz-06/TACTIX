@@ -1,7 +1,7 @@
-import { MarketServiceClient } from '../../../worldmonitor/src/generated/client/worldmonitor/market/v1/service_client';
-import { EconomicServiceClient } from '../../../worldmonitor/src/generated/client/worldmonitor/economic/v1/service_client';
-import { IntelligenceServiceClient } from '../../../worldmonitor/src/generated/client/worldmonitor/intelligence/v1/service_client';
-import { NewsServiceClient } from '../../../worldmonitor/src/generated/client/worldmonitor/news/v1/service_client';
+import { MarketServiceClient } from '../generated/client/worldmonitor/market/v1/service_client';
+import { EconomicServiceClient } from '../generated/client/worldmonitor/economic/v1/service_client';
+import { IntelligenceServiceClient } from '../generated/client/worldmonitor/intelligence/v1/service_client';
+import { NewsServiceClient } from '../generated/client/worldmonitor/news/v1/service_client';
 
 // Frontend uses the local Mastra gateway which proxies to the WorldMonitor backend
 // The gateway usually runs on 3001

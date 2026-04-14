@@ -168,12 +168,12 @@ const NATURE_PROMPTS = [
 
 function CommoditiesPage() {
   const [analyzing, setAnalyzing] = React.useState(false)
-  const [analysis, setAnalysis]   = React.useState<IntelGraphData | null>(null)
+  const [analysis, setAnalysis] = React.useState<IntelGraphData | null>(null)
 
   const handlePromptClick = async (promptText: string) => {
     setAnalyzing(true)
     setAnalysis(null)
-    
+
     try {
       const res = await fetch('http://localhost:3001/api/agent/nature', {
         method: 'POST',
@@ -183,7 +183,7 @@ function CommoditiesPage() {
 
       if (!res.ok) throw new Error('Nature agent offline')
       const json = await res.json()
-      
+
       const graphData = json.data
       if (graphData && graphData.nodes) {
         setAnalysis(graphData)
@@ -207,40 +207,40 @@ function CommoditiesPage() {
           </h1>
           <p className="text-muted-foreground text-sm mt-1">Monitor global natural events and weather anomalies</p>
         </div>
-        
+
         <div className="grid gap-4">
           {NATURE_PROMPTS.map((promptText, idx) => (
-             <motion.button
-               key={idx}
-               whileHover={{ scale: 1.02 }}
-               whileTap={{ scale: 0.98 }}
-               disabled={analyzing}
-               onClick={() => handlePromptClick(promptText)}
-               className="glass rounded-2xl p-4 border border-white/5 hover:border-primary/20 text-left flex justify-between items-center group transition-all"
-             >
-               <span className="text-sm font-medium text-foreground/80 group-hover:text-foreground">{promptText}</span>
-               <Zap className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-             </motion.button>
+            <motion.button
+              key={idx}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              disabled={analyzing}
+              onClick={() => handlePromptClick(promptText)}
+              className="glass rounded-2xl p-4 border border-white/5 hover:border-primary/20 text-left flex justify-between items-center group transition-all"
+            >
+              <span className="text-sm font-medium text-foreground/80 group-hover:text-foreground">{promptText}</span>
+              <Zap className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+            </motion.button>
           ))}
         </div>
 
         {analyzing && (
-           <div className="glass rounded-2xl p-6 border border-white/5 flex flex-col items-center justify-center gap-4 animate-pulse">
-             <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-             <span className="text-xs uppercase tracking-widest text-muted-foreground font-black">Analyzing Nature Intelligence...</span>
-           </div>
+          <div className="glass rounded-2xl p-6 border border-white/5 flex flex-col items-center justify-center gap-4 animate-pulse">
+            <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+            <span className="text-xs uppercase tracking-widest text-muted-foreground font-black">Analyzing Nature Intelligence...</span>
+          </div>
         )}
       </div>
 
       {/* Nature Agent Overlay */}
       <AnimatePresence>
         {analysis && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-center justify-center p-6"
             onClick={() => setAnalysis(null)}
           >
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }}
               onClick={e => e.stopPropagation()}
               className="bg-[#0c0c14] border border-primary/20 w-full max-w-6xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col h-[90vh]"
@@ -253,20 +253,20 @@ function CommoditiesPage() {
                   </div>
                   <h2 className="text-2xl font-black tracking-tight">{analysis.headline || 'Natural Calamity Analysis'}</h2>
                 </div>
-                <button 
+                <button
                   onClick={() => setAnalysis(null)}
                   className="p-2 hover:bg-white/10 rounded-full transition-colors"
                 >
                   <Search className="w-5 h-5 rotate-45 text-muted-foreground" />
                 </button>
               </div>
-              
+
               <div className="flex-1 overflow-y-auto custom-scrollbar relative">
                 <IntelligenceGraph data={analysis} />
               </div>
-              
+
               <div className="p-6 bg-black/40 border-t border-white/5 flex justify-between items-center shrink-0">
-                <button 
+                <button
                   onClick={() => setAnalysis(null)}
                   className="px-6 py-2 bg-primary text-primary-foreground rounded-full text-xs font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg ml-auto"
                 >
@@ -283,30 +283,30 @@ function CommoditiesPage() {
 
 // ─── Page: Market Indices ────────────────────────────────────────────────────
 const INDEX_DATA = [
-  { name: 'S&P 500',   value: '5,233.40', change: '+0.74%', up: true },
-  { name: 'NASDAQ',    value: '16,428.82', change: '+1.12%', up: true },
+  { name: 'S&P 500', value: '5,233.40', change: '+0.74%', up: true },
+  { name: 'NASDAQ', value: '16,428.82', change: '+1.12%', up: true },
   { name: 'Dow Jones', value: '38,996.39', change: '+0.31%', up: true },
-  { name: 'FTSE 100',  value: '7,952.62', change: '-0.18%', up: false },
-  { name: 'DAX',       value: '17,932.76', change: '+0.55%', up: true },
-  { name: 'Nikkei 225',value: '38,487.90', change: '-0.29%', up: false },
-  { name: 'Shanghai',  value: '3,077.11', change: '+0.44%', up: true },
+  { name: 'FTSE 100', value: '7,952.62', change: '-0.18%', up: false },
+  { name: 'DAX', value: '17,932.76', change: '+0.55%', up: true },
+  { name: 'Nikkei 225', value: '38,487.90', change: '-0.29%', up: false },
+  { name: 'Shanghai', value: '3,077.11', change: '+0.44%', up: true },
   { name: 'Hang Seng', value: '17,201.27', change: '-0.62%', up: false },
 ]
 
 function IndicesPage() {
   const [analyzing, setAnalyzing] = React.useState(false)
-  const [analysis, setAnalysis]   = React.useState<IntelGraphData | null>(null)
+  const [analysis, setAnalysis] = React.useState<IntelGraphData | null>(null)
 
   const handleMarketClick = async (context?: string) => {
     setAnalyzing(true)
     setAnalysis(null)
-    
+
     try {
       const res = await fetch('http://localhost:3001/api/agent/market', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prompt: context 
+          prompt: context
             ? `Analyze global market volatility trends focusing on ${context}. Evaluate correlation between indices and current macro threats.`
             : "Analyze the current global market volatility and risk correlation across major indices."
         })
@@ -342,11 +342,10 @@ function IndicesPage() {
             whileTap={{ scale: 0.95 }}
             onClick={() => handleMarketClick()}
             disabled={analyzing}
-            className={`px-5 py-2 rounded-2xl flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all ${
-              analyzing 
-                ? 'bg-primary/20 text-primary border border-primary/30' 
+            className={`px-5 py-2 rounded-2xl flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all ${analyzing
+                ? 'bg-primary/20 text-primary border border-primary/30'
                 : 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
-            }`}
+              }`}
           >
             <Activity className={`w-3.5 h-3.5 ${analyzing ? 'animate-spin' : ''}`} />
             {analyzing ? 'Synthesizing...' : 'Perform Market Synthesis'}
@@ -395,12 +394,12 @@ function IndicesPage() {
       {/* Market Agent Overlay */}
       <AnimatePresence>
         {analysis && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-center justify-center p-6"
             onClick={() => setAnalysis(null)}
           >
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }}
               onClick={e => e.stopPropagation()}
               className="bg-[#0c0c14] border border-primary/20 w-full max-w-6xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col h-[90vh]"
@@ -413,18 +412,18 @@ function IndicesPage() {
                   </div>
                   <h2 className="text-2xl font-black tracking-tight">{analysis.headline || 'Market Volatility Analysis'}</h2>
                 </div>
-                <button 
+                <button
                   onClick={() => setAnalysis(null)}
                   className="p-2 hover:bg-white/10 rounded-full transition-colors"
                 >
                   <Search className="w-5 h-5 rotate-45 text-muted-foreground" />
                 </button>
               </div>
-              
+
               <div className="flex-1 overflow-y-auto custom-scrollbar relative">
                 <IntelligenceGraph data={analysis} />
               </div>
-              
+
               <div className="p-6 bg-black/40 border-t border-white/5 flex justify-between items-center shrink-0">
                 <div className="flex gap-4">
                   <div className="flex flex-col">
@@ -432,7 +431,7 @@ function IndicesPage() {
                     <span className="text-xs font-bold text-blue-500">MARKET-SENTINEL V1.2</span>
                   </div>
                 </div>
-                <button 
+                <button
                   onClick={() => setAnalysis(null)}
                   className="px-6 py-2 bg-primary text-primary-foreground rounded-full text-xs font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg"
                 >
@@ -462,14 +461,14 @@ const STATUS_COLOR = { active: 'bg-green-500', warning: 'bg-amber-500', critical
 
 function NexusPage() {
   const [analyzing, setAnalyzing] = React.useState<string | null>(null)
-  const [analysis, setAnalysis]   = React.useState<IntelGraphData | null>(null)
+  const [analysis, setAnalysis] = React.useState<IntelGraphData | null>(null)
   const [selectedNodeName, setSelectedNodeName] = React.useState('')
 
   const handleNodeClick = async (node: (typeof NEXUS_NODES)[0]) => {
     setAnalyzing(node.id)
     setAnalysis(null)
     setSelectedNodeName(node.label)
-    
+
     try {
       const res = await fetch('http://localhost:3001/api/agent/shadow', {
         method: 'POST',
@@ -481,10 +480,10 @@ function NexusPage() {
 
       if (!res.ok) throw new Error('Agent offline')
       const json = await res.json()
-      
+
       // The user provided the structure: { data: { nodes, edges, headline } }
       const graphData = json.data
-      
+
       if (graphData && graphData.nodes) {
         setAnalysis(graphData)
       } else {
@@ -516,9 +515,8 @@ function NexusPage() {
               whileHover={{ scale: 1.01, x: 4 }}
               whileTap={{ scale: 0.99 }}
               onClick={() => handleNodeClick(node)}
-              className={`glass rounded-2xl p-4 border transition-all duration-300 shadow-xl flex items-center gap-5 cursor-pointer group ${
-                analyzing === node.id ? 'border-primary shadow-[0_0_20px_rgba(var(--primary),0.3)] ring-1 ring-primary/50' : 'border-white/5'
-              }`}
+              className={`glass rounded-2xl p-4 border transition-all duration-300 shadow-xl flex items-center gap-5 cursor-pointer group ${analyzing === node.id ? 'border-primary shadow-[0_0_20px_rgba(var(--primary),0.3)] ring-1 ring-primary/50' : 'border-white/5'
+                }`}
             >
               <div className={`w-3 h-3 rounded-full shrink-0 ${STATUS_COLOR[node.status as keyof typeof STATUS_COLOR]} shadow-lg ${analyzing === node.id ? 'animate-ping' : ''}`} />
               <div className="flex-1 min-w-0">
@@ -526,7 +524,7 @@ function NexusPage() {
                   <span className="font-bold text-sm tracking-tight">{node.label}</span>
                   <span className="text-[9px] font-black uppercase text-muted-foreground bg-white/10 px-2 py-0.5 rounded-full tracking-wider">{node.type}</span>
                   {analyzing === node.id && (
-                    <motion.span 
+                    <motion.span
                       initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                       className="text-[9px] font-bold text-primary animate-pulse ml-auto"
                     >
@@ -552,12 +550,12 @@ function NexusPage() {
       {/* Shadow Analysis Overlay */}
       <AnimatePresence>
         {analysis && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-center justify-center p-6"
             onClick={() => setAnalysis(null)}
           >
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }}
               onClick={e => e.stopPropagation()}
               className="bg-[#0c0c14] border border-primary/20 w-full max-w-6xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col h-[90vh]"
@@ -570,18 +568,18 @@ function NexusPage() {
                   </div>
                   <h2 className="text-2xl font-black tracking-tight">{analysis.headline || selectedNodeName}</h2>
                 </div>
-                <button 
+                <button
                   onClick={() => setAnalysis(null)}
                   className="p-2 hover:bg-white/10 rounded-full transition-colors"
                 >
                   <Search className="w-5 h-5 rotate-45 text-muted-foreground" />
                 </button>
               </div>
-              
+
               <div className="flex-1 overflow-y-auto custom-scrollbar relative">
                 <IntelligenceGraph data={analysis} />
               </div>
-              
+
               <div className="p-6 bg-black/40 border-t border-white/5 flex justify-between items-center shrink-0">
                 <div className="flex gap-4">
                   <div className="flex flex-col">
@@ -593,7 +591,7 @@ function NexusPage() {
                     <span className="text-xs font-bold transition-all">0.14s</span>
                   </div>
                 </div>
-                <button 
+                <button
                   onClick={() => setAnalysis(null)}
                   className="px-6 py-2 bg-primary text-primary-foreground rounded-full text-xs font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg"
                 >
@@ -623,12 +621,12 @@ type ChatMsg =
 
 function NexusQueryPage() {
   const { pendingQuery, setPendingQuery } = useDashboardStore()
-  const [query, setQuery]     = React.useState('')
+  const [query, setQuery] = React.useState('')
   const [messages, setMessages] = React.useState<ChatMsg[]>([
     { role: 'agent', text: 'Nexus Intelligence Interface online. I synthesise threats across Market, Nature, Shadow, and Geopolitical domains. Type a topic and I will generate an interactive intelligence graph.' }
   ])
   const [loading, setLoading] = React.useState(false)
-  const bottomRef             = React.useRef<HTMLDivElement>(null)
+  const bottomRef = React.useRef<HTMLDivElement>(null)
 
   // Auto-fire if the dashboard AI button sent a query
   React.useEffect(() => {
@@ -719,9 +717,8 @@ function NexusQueryPage() {
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.25 }}
-                className={`flex ${
-                  msg.role === 'user' ? 'justify-end' : 'justify-start'
-                }`}
+                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'
+                  }`}
               >
                 {msg.role === 'user' && (
                   <div className="max-w-[70%] rounded-2xl px-4 py-3 text-sm bg-primary text-primary-foreground font-medium">
@@ -759,8 +756,8 @@ function NexusQueryPage() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
               <div className="glass border border-white/10 rounded-2xl px-5 py-4 flex items-center gap-3">
                 <div className="flex gap-1">
-                  {[0,1,2].map(i => (
-                    <div key={i} className="w-1.5 h-1.5 rounded-full bg-primary/70 animate-bounce" style={{ animationDelay: `${i*0.15}s` }} />
+                  {[0, 1, 2].map(i => (
+                    <div key={i} className="w-1.5 h-1.5 rounded-full bg-primary/70 animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
                   ))}
                 </div>
                 <span className="text-[11px] text-muted-foreground font-mono uppercase tracking-widest">Synthesising intelligence graph…</span>
@@ -803,13 +800,13 @@ export default function App() {
 
   const renderPage = () => {
     switch (activePage) {
-      case 'dashboard':   return <DashboardPage />
-      case 'map':         return <MapPage />
+      case 'dashboard': return <DashboardPage />
+      case 'map': return <MapPage />
       case 'commodities': return <CommoditiesPage />
-      case 'indices':     return <IndicesPage />
-      case 'nexus':       return <NexusPage />
+      case 'indices': return <IndicesPage />
+      case 'nexus': return <NexusPage />
       case 'nexus-query': return <NexusQueryPage />
-      default:            return <DashboardPage />
+      default: return <DashboardPage />
     }
   }
 
