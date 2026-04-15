@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom'
 import { Lock, HelpCircle, X, MoreVertical, Search, BarChart2, Activity, Zap, TrendingUp, ShieldAlert } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import IntelligenceGraph, { type IntelGraphData } from './IntelligenceGraph'
-import { marketClient, economicClient, formatBloombergPrice, formatBloombergChange } from '../lib/api'
+import { marketClient, economicClient, formatBloombergPrice, formatBloombergChange, BASE_URL } from '../lib/api'
 
 const metals = [
   { id: 'gold',     name: 'XAU',      display: 'GOLD (OZ)',      symbol: 'GC=F' },
@@ -63,7 +63,7 @@ export default function CommodityPanel() {
     setChatInput('')
     
     try {
-      const res = await fetch('http://localhost:3001/api/agent/market', {
+      const res = await fetch(`${BASE_URL}/api/agent/market`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -495,7 +495,7 @@ Return as high-fidelity JSON.`
                           setChatLoading(true)
                           
                           try {
-                            const res = await fetch('http://localhost:3001/api/agent/market', {
+                            const res = await fetch(`${BASE_URL}/api/agent/market`, {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json' },
                               body: JSON.stringify({ 

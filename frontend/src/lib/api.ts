@@ -3,9 +3,9 @@ import { EconomicServiceClient } from '../generated/client/worldmonitor/economic
 import { IntelligenceServiceClient } from '../generated/client/worldmonitor/intelligence/v1/service_client';
 import { NewsServiceClient } from '../generated/client/worldmonitor/news/v1/service_client';
 
-// Frontend uses the local Mastra gateway which proxies to the WorldMonitor backend
+
 // The gateway usually runs on 3001
-const BASE_URL = 'http://localhost:3001';
+export const BASE_URL = 'https://tactix-back-1.onrender.com';
 
 export const marketClient = new MarketServiceClient(BASE_URL);
 export const economicClient = new EconomicServiceClient(BASE_URL);
@@ -19,7 +19,7 @@ export function formatBloombergPrice(value: number | string | null | undefined, 
   if (value === null || value === undefined) return '---';
   const num = typeof value === 'string' ? parseFloat(value.replace(/[^0-9.-]+/g, '')) : value;
   if (isNaN(num)) return '---';
-  
+
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -35,7 +35,7 @@ export function formatBloombergChange(value: number | string | null | undefined)
   if (value === null || value === undefined) return '0.00%';
   const num = typeof value === 'string' ? parseFloat(value.replace(/[^0-9.-]+/g, '')) : value;
   if (isNaN(num)) return '0.00%';
-  
+
   const sign = num > 0 ? '+' : '';
   return `${sign}${num.toFixed(2)}%`;
 }

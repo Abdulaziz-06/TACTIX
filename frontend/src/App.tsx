@@ -11,6 +11,7 @@ import CommodityPanel from './components/CommodityPanel'
 import InsightsPanel from './components/InsightsPanel'
 import { Search, BarChart2, TrendingUp, Activity, Anchor, MessageSquare, Send, Zap, AlertCircle, Shield, Box } from 'lucide-react'
 import IntelligenceGraph, { type IntelGraphData } from './components/IntelligenceGraph'
+import { BASE_URL } from './lib/api'
 
 // ─── Error Boundary ─────────────────────────────────────────────────────────
 class MapErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: string }> {
@@ -175,7 +176,7 @@ function CommoditiesPage() {
     setAnalysis(null)
 
     try {
-      const res = await fetch('http://localhost:3001/api/agent/nature', {
+      const res = await fetch(`${BASE_URL}/api/agent/nature`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: promptText })
@@ -302,7 +303,7 @@ function IndicesPage() {
     setAnalysis(null)
 
     try {
-      const res = await fetch('http://localhost:3001/api/agent/market', {
+      const res = await fetch(`${BASE_URL}/api/agent/market`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -470,7 +471,7 @@ function NexusPage() {
     setSelectedNodeName(node.label)
 
     try {
-      const res = await fetch('http://localhost:3001/api/agent/shadow', {
+      const res = await fetch(`${BASE_URL}/api/agent/shadow`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -650,7 +651,7 @@ function NexusQueryPage() {
     setLoading(true)
 
     try {
-      const res = await fetch('http://localhost:3001/api/workflow/intelligence', {
+      const res = await fetch(`${BASE_URL}/api/workflow/intelligence`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ topic: userMsg }),
