@@ -5,7 +5,7 @@ import { NewsServiceClient } from '../generated/client/worldmonitor/news/v1/serv
 
 
 // The gateway usually runs on 3001
-export const BASE_URL = 'https://tactix-back-1.onrender.com';
+export const BASE_URL = 'https://tactix-back.onrender.com';
 
 export const marketClient = new MarketServiceClient(BASE_URL);
 export const economicClient = new EconomicServiceClient(BASE_URL);
