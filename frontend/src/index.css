@@ -46,15 +46,17 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Google Sans', 'Google Sans Text', system-ui, -apple-system, sans-serif;
     font-feature-settings: "tnum" on, "lnum" on;
     cursor: default;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
-/* Bloomberg / Terminal Fonts */
-@font-face {
-  font-family: 'JetBrains Mono';
-  src: url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap');
+/* Typography Fonts */
+.font-sans {
+  font-family: 'Google Sans', 'Google Sans Text', system-ui, -apple-system, sans-serif;
 }
 
 .font-mono {

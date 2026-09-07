@@ -7,22 +7,23 @@ import { NewsServiceClient } from '../generated/client/worldmonitor/news/v1/serv
 // The gateway usually runs on 3001
 export const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-export const marketClient = new MarketServiceClient(BASE_URL);
+// Market client uses same-origin so Vite proxy handles live stock data smoothly
+export const marketClient = new MarketServiceClient('');
 export const economicClient = new EconomicServiceClient(BASE_URL);
 export const intelClient = new IntelligenceServiceClient(BASE_URL);
 export const newsClient = new NewsServiceClient(BASE_URL);
 
 /**
- * Format currency values in Bloomberg style
+ * Format currency values in Bloomberg / NSE style in INR
  */
-export function formatBloombergPrice(value: number | string | null | undefined, currency = '$'): string {
+export function formatBloombergPrice(value: number | string | null | undefined, currency = 'INR'): string {
   if (value === null || value === undefined) return '---';
   const num = typeof value === 'string' ? parseFloat(value.replace(/[^0-9.-]+/g, '')) : value;
   if (isNaN(num)) return '---';
 
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('en-IN', {
     style: 'currency',
-    currency: 'USD',
+    currency: currency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(num);

@@ -6,13 +6,19 @@ import { useQuery } from '@tanstack/react-query'
 import IntelligenceGraph, { type IntelGraphData } from './IntelligenceGraph'
 import { marketClient, economicClient, formatBloombergPrice, formatBloombergChange, BASE_URL } from '../lib/api'
 
-const metals = [
-  { id: 'gold',     name: 'XAU',      display: 'GOLD (OZ)',      symbol: 'GC=F' },
-  { id: 'silver',   name: 'XAG',      display: 'SILVER (OZ)',    symbol: 'SI=F' },
-  { id: 'copper',   name: 'HG',       display: 'COPPER (LB)',    symbol: 'HG=F' },
-  { id: 'platinum', name: 'PL',       display: 'PLATINUM (OZ)',  symbol: 'PL=F' },
-  { id: 'palladium',name: 'PA',       display: 'PALLADIUM (OZ)', symbol: 'PA=F' },
-  { id: 'aluminum', name: 'AL',       display: 'ALUMINUM (MT)',  symbol: 'ALI=F' },
+const indianEquities = [
+  { id: 'reliance',  name: 'RELIANCE',   display: 'Reliance Industries (NSE)', symbol: 'RELIANCE.NS' },
+  { id: 'tcs',       name: 'TCS',        display: 'Tata Consultancy Services', symbol: 'TCS.NS' },
+  { id: 'hdfc',      name: 'HDFCBANK',   display: 'HDFC Bank Ltd',             symbol: 'HDFCBANK.NS' },
+  { id: 'infy',      name: 'INFOSYS',    display: 'Infosys Limited',           symbol: 'INFY.NS' },
+  { id: 'icici',     name: 'ICICIBANK',  display: 'ICICI Bank Ltd',            symbol: 'ICICIBANK.NS' },
+  { id: 'sbin',      name: 'SBIN',       display: 'State Bank of India',       symbol: 'SBIN.NS' },
+]
+
+const indianIndices = [
+  { id: 'nifty50',   name: 'NIFTY 50',   display: 'NSE NIFTY 50',     symbol: '^NSEI',  sub: 'NSE BENCHMARK' },
+  { id: 'sensex',    name: 'SENSEX',     display: 'BSE SENSEX 30',    symbol: '^BSESN', sub: 'BSE BENCHMARK' },
+  { id: 'banknifty', name: 'BANK NIFTY', display: 'NIFTY BANK INDEX', symbol: '^NSEBANK', sub: 'BANKING SECTOR' },
 ]
 
 export default function CommodityPanel() {
@@ -22,39 +28,39 @@ export default function CommodityPanel() {
   const [chatLog, setChatLog] = useState<{role: 'user'|'agent', text: string}[]>([])
   const [chatLoading, setChatLoading] = useState(false)
 
-  // Fetch Metal Quotes
-  const { data: metalQuotes } = useQuery({
-    queryKey: ['market', 'metals'],
-    queryFn: () => marketClient.listCommodityQuotes({ symbols: metals.map(m => m.symbol) }),
-    refetchInterval: 30000,
+  // Fetch Live Indian Equities
+  const { data: stockQuotes } = useQuery({
+    queryKey: ['market', 'indian-equities'],
+    queryFn: async () => {
+      const res = await fetch(`/api/market/v1/list-commodity-quotes?symbols=${indianEquities.map(m => m.symbol).join(',')}`);
+      if (!res.ok) throw new Error('Failed to fetch stock quotes');
+      return res.json();
+    },
+    refetchInterval: 10000,
   })
 
-  // Fetch Energy Storage Data
-  const { data: crudeInv } = useQuery({
-    queryKey: ['economic', 'crude'],
-    queryFn: () => economicClient.getCrudeInventories({}),
-    refetchInterval: 60000,
+  // Fetch Live Indian Indices
+  const { data: indexQuotes } = useQuery({
+    queryKey: ['market', 'indian-indices'],
+    queryFn: async () => {
+      const res = await fetch(`/api/market/v1/list-commodity-quotes?symbols=${encodeURIComponent(indianIndices.map(m => m.symbol).join(','))}`);
+      if (!res.ok) throw new Error('Failed to fetch index quotes');
+      return res.json();
+    },
+    refetchInterval: 10000,
   })
 
-  const { data: natGasStorage } = useQuery({
-    queryKey: ['economic', 'natgas'],
-    queryFn: () => economicClient.getNatGasStorage({}),
-    refetchInterval: 60000,
-  })
-
-  const { data: euGasStorage } = useQuery({
-    queryKey: ['economic', 'eugas'],
-    queryFn: () => economicClient.getEuGasStorage({}),
-    refetchInterval: 60000,
-  })
-
-  const latestCrude = crudeInv?.weeks?.[0]
-  const prevCrude = crudeInv?.weeks?.[1]
-  const crudeChange = latestCrude && prevCrude ? latestCrude.stocksMb - prevCrude.stocksMb : 0
-
-  const latestGas = natGasStorage?.weeks?.[0]
-  const prevGas = natGasStorage?.weeks?.[1]
-  const gasChange = latestGas && prevGas ? latestGas.storBcf - prevGas.storBcf : 0
+  const getSparklineSvgPoints = (points: number[] | undefined, width = 100, height = 30) => {
+    if (!points || points.length < 2) return "0,15 50,15 100,15"
+    const min = Math.min(...points)
+    const max = Math.max(...points)
+    const range = max - min || 1
+    return points.map((p, idx) => {
+      const x = (idx / (points.length - 1)) * width
+      const y = height - ((p - min) / range) * (height - 6) - 3
+      return `${x.toFixed(1)},${y.toFixed(1)}`
+    }).join(' ')
+  }
 
   const handleItemClick = async (itemLabel: string) => {
     setAnalyzing(itemLabel)
@@ -67,11 +73,11 @@ export default function CommodityPanel() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prompt: `Analyze ${itemLabel}. Provide a structured intelligence graph with 4 nodes:
-1. MARKET_CONTEXT: Current price drivers and macroeconomic background.
+          prompt: `Analyze Indian market asset: ${itemLabel}. Provide a structured intelligence graph with 4 nodes:
+1. MARKET_CONTEXT: Current price drivers, domestic institutional flow, and Indian macroeconomic background.
 2. PREDICTION: Forecast for next 14 days with confidence levels.
-3. RISK_ASSESSMENT: Major threat factors or volatility triggers.
-4. TACTICAL_ADVICE: Specific suggested action for an intelligence operator.
+3. RISK_ASSESSMENT: Major volatility triggers (RBI policy, FII flows, currency fluctuations).
+4. TACTICAL_ADVICE: Specific suggested action for an equity intelligence operator.
 Return as high-fidelity JSON.`
         })
       }).catch(() => null)
@@ -86,12 +92,12 @@ Return as high-fidelity JSON.`
         setAnalysis(graphData)
       } else {
         setAnalysis({
-          headline: `${itemLabel} Intelligence Report`,
+          headline: `${itemLabel} Intelligence Assessment`,
           nodes: [
-            { id: '1', label: 'Context', type: 'SIGNAL' as const, category: 'GEOPOLITICAL' as const, threatLevel: 'MODERATE' as const, description: `Supply chain constraints in key export hubs are maintaining high floor for ${itemLabel}.` },
-            { id: '2', label: 'Forecast', type: 'PREDICTION' as const, category: 'GEOPOLITICAL' as const, threatLevel: 'ELEVATED' as const, description: `Short-term bullish trend expected as industrial demand outstrips seasonal inventory builds.` },
-            { id: '3', label: 'Risk', type: 'SIGNAL' as const, category: 'GEOPOLITICAL' as const, threatLevel: 'CRITICAL' as const, description: `Geopolitical escalation in production theaters remains the primary tail-risk.` },
-            { id: '4', label: 'Action', type: 'IMPACT' as const, category: 'GEOPOLITICAL' as const, threatLevel: 'LOW' as const, description: `Standard Protocol: Accumulate on dips below weighted average. Hedge against regional instability.` }
+            { id: '1', label: 'Context', type: 'SIGNAL' as const, category: 'GEOPOLITICAL' as const, threatLevel: 'MODERATE' as const, description: `Domestic institutional investment inflows and strong retail participation support high valuations for ${itemLabel}.` },
+            { id: '2', label: 'Forecast', type: 'PREDICTION' as const, category: 'GEOPOLITICAL' as const, threatLevel: 'ELEVATED' as const, description: `Consolidation pattern expected near key technical support levels over the next 14-day horizon.` },
+            { id: '3', label: 'Risk', type: 'SIGNAL' as const, category: 'GEOPOLITICAL' as const, threatLevel: 'CRITICAL' as const, description: `Foreign portfolio outflows and global interest rate adjustments pose near-term headwinds.` },
+            { id: '4', label: 'Action', type: 'IMPACT' as const, category: 'GEOPOLITICAL' as const, threatLevel: 'LOW' as const, description: `Operator Directive: Maintain tactical position on dips. Hedge through index derivatives if volatility surges.` }
           ],
           edges: []
         })
@@ -103,51 +109,49 @@ Return as high-fidelity JSON.`
     }
   }
 
+  const niftyQuote = (indexQuotes?.quotes as any[])?.find(q => q.symbol === '^NSEI' || q.symbol?.includes('NSEI'))
+  const sensexQuote = (indexQuotes?.quotes as any[])?.find(q => q.symbol === '^BSESN' || q.symbol?.includes('BSESN'))
+  const bankNiftyQuote = (indexQuotes?.quotes as any[])?.find(q => q.symbol === '^NSEBANK' || q.symbol?.includes('NSEBANK'))
+
   return (
     <>
-      <div className="flex flex-col md:flex-row bg-black/90 backdrop-blur-3xl border border-[#333] rounded-sm overflow-hidden text-white font-mono text-xs w-full divide-y md:divide-y-0 md:divide-x divide-[#333] shadow-2xl terminal-grid">
+      <div className="flex flex-col gap-4 w-full font-mono text-xs text-white">
         
-        {/* Left Column: Metals & Materials */}
-        <div className="flex flex-col p-4 gap-4 flex-1 relative scanline">
-          <div className="flex items-center justify-between text-[10px] font-bold tracking-[0.2em] text-[#ffaa00]">
+        {/* Top Full-Width Section: Indian Equities */}
+        <div className="bg-black/90 backdrop-blur-3xl border border-[#333] rounded-sm p-4 relative scanline shadow-xl">
+          <div className="flex items-center justify-between text-[10px] font-bold tracking-[0.2em] text-[#ffaa00] mb-3">
             <div className="flex items-center gap-2">
               <Activity className="w-3.5 h-3.5 animate-pulse" />
-              <span>COMMODITY_MATRIX // METALS</span>
+              <span>INDIA_EQUITIES // NSE & BSE</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[8px] bg-[#ffaa00]/10 px-2 py-0.5 border border-[#ffaa00]/30">REAL_TIME</span>
+              <span className="text-[8px] bg-[#ffaa00]/10 px-2 py-0.5 border border-[#ffaa00]/30">REAL_TIME_INR</span>
             </div>
           </div>
-          
-          <div className="flex gap-4 border-b border-[#333] pb-2 text-[10px] font-bold text-[#888]">
-            <span className="text-[#ffaa00] border-b border-[#ffaa00] pb-2 -mb-[9px] px-1 transition-colors cursor-pointer">METALS</span>
-            <span className="cursor-pointer hover:text-white px-1">ENERGY</span>
-            <span className="cursor-pointer hover:text-white px-1">AGRI</span>
-          </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 mt-2">
-            {metals.map((metal) => {
-              const quote = metalQuotes?.quotes?.find((q: any) => q.symbol === metal.symbol)
-              const price = quote?.price ? formatBloombergPrice(quote.price) : '---'
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            {indianEquities.map((stock) => {
+              const quote: any = (stockQuotes?.quotes as any[])?.find((q: any) => q.symbol === stock.symbol)
+              const price = quote?.price ? formatBloombergPrice(quote.price, 'INR') : '---'
               const change = quote?.change != null ? formatBloombergChange(quote.change) : '0.00%'
               const isUp = quote?.change != null ? quote.change >= 0 : true
 
               return (
                 <motion.div
-                  key={metal.id}
+                  key={stock.id}
                   whileHover={{ scale: 1.02, backgroundColor: "rgba(255,170,0,0.05)" }}
-                  onClick={() => handleItemClick(metal.display)}
-                  className={`bg-[#0a0a0a] p-3 rounded-none flex flex-col gap-1 border relative group cursor-pointer transition-all duration-200 ${analyzing === metal.display ? 'border-[#ffaa00] bg-[#ffaa00]/5 ring-1 ring-[#ffaa00]/20' : 'border-[#222]'}`}
+                  onClick={() => handleItemClick(stock.display)}
+                  className={`bg-[#0a0a0a] p-3.5 rounded-none flex flex-col gap-1 border relative group cursor-pointer transition-all duration-200 ${analyzing === stock.display ? 'border-[#ffaa00] bg-[#ffaa00]/5 ring-1 ring-[#ffaa00]/20' : 'border-[#222]'}`}
                 >
                   <div className="flex justify-between items-start">
-                    <span className="text-[9px] text-[#888] font-bold tracking-tight uppercase">{metal.name}</span>
-                    <TrendingUp className={`w-3 h-3 ${isUp ? 'text-[#00ff88]' : 'text-[#ff3333]'} opacity-50`} />
+                    <span className="text-[10px] text-[#888] font-bold tracking-tight uppercase">{stock.name}</span>
+                    <TrendingUp className={`w-3.5 h-3.5 ${isUp ? 'text-[#00ff88]' : 'text-[#ff3333]'} opacity-60`} />
                   </div>
-                  <span className="text-base font-black tracking-tighter text-white">{price}</span>
-                  <span className={`text-[9px] font-bold ${isUp ? 'text-[#00ff88]' : 'text-[#ff3333]'}`}>
+                  <span className="text-lg font-black tracking-tighter text-white">{price}</span>
+                  <span className={`text-[10px] font-bold ${isUp ? 'text-[#00ff88]' : 'text-[#ff3333]'}`}>
                     {change}
                   </span>
-                  {analyzing === metal.display && (
+                  {analyzing === stock.display && (
                     <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-[2px]">
                       <span className="text-[8px] text-[#ffaa00] animate-pulse font-black tracking-widest uppercase">INTEL_SCAN</span>
                     </div>
@@ -156,144 +160,126 @@ Return as high-fidelity JSON.`
               )
             })}
           </div>
-
-          <div className="mt-2 border-t border-[#333] pt-4 flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              <Zap className="w-3.5 h-3.5 text-[#ffaa00]" />
-              <span className="text-[10px] font-black tracking-widest text-white uppercase">Neural Briefing</span>
-            </div>
-            <div className="bg-[#050505] p-3 border border-white/5 relative overflow-hidden group">
-               <div className="absolute top-0 right-0 p-1">
-                 <Lock className="w-3 h-3 text-[#ffaa00]/40 group-hover:text-[#ffaa00] transition-colors" />
-               </div>
-               <p className="text-[10px] text-[#666] leading-relaxed italic">
-                 "Authorization required to decode current market narrative. Global signals suggest anomalous accumulation in industrial sectors..."
-               </p>
-               <button className="mt-2 text-[9px] font-black text-[#ffaa00] uppercase tracking-widest hover:underline transition-all">
-                 Request Access [ROOT_DB]
-               </button>
-            </div>
-          </div>
         </div>
 
-        {/* Right Column: Energy Complexing */}
-        <div className="flex flex-col p-4 gap-4 flex-1 bg-[#080808]">
-          <div className="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] text-[#00aaff]">
-            <Zap className="w-3.5 h-3.5" />
-            <span>ENERGY_STORAGE_DETECTOR</span>
+        {/* Bottom Section: Indian Indices Radar in Wide 3-Column Layout */}
+        <div className="bg-[#080808] border border-[#333] rounded-sm p-4 flex flex-col gap-3 shadow-xl">
+          <div className="flex items-center justify-between text-[10px] font-bold tracking-[0.2em] text-[#00aaff]">
+            <div className="flex items-center gap-2">
+              <Zap className="w-3.5 h-3.5" />
+              <span>INDIAN_INDICES_RADAR</span>
+            </div>
+            <span className="text-[8px] text-[#555] uppercase">BENCHMARK // NSE & BSE</span>
           </div>
 
-          <div className="flex flex-col gap-4 mt-2">
-             {/* Crude */}
-             <div 
-               onClick={() => handleItemClick('US Crude Inventories')}
-               className={`flex flex-col gap-2 cursor-pointer p-3 rounded-none transition-all border ${analyzing === 'US Crude Inventories' ? 'border-[#00aaff] bg-[#00aaff]/5 ring-1 ring-[#00aaff]/20' : 'border-[#222] bg-[#050505] hover:border-[#444]'}`}
-             >
-                <div className="flex items-center justify-between">
-                  <span className="text-[9px] text-[#888] uppercase font-black tracking-widest">US CRUDE (MB)</span>
-                  <div className="flex gap-1 h-1">
-                    {[1,2,3].map(i => <div key={i} className="w-1 bg-[#00aaff]/30" />)}
-                  </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            {/* Nifty 50 */}
+            <div 
+              onClick={() => handleItemClick('NIFTY 50 Benchmark')}
+              className={`flex flex-col gap-2 cursor-pointer p-3 rounded-none transition-all border ${analyzing === 'NIFTY 50 Benchmark' ? 'border-[#00aaff] bg-[#00aaff]/5 ring-1 ring-[#00aaff]/20' : 'border-[#222] bg-[#050505] hover:border-[#444]'}`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[9px] text-[#888] uppercase font-black tracking-widest">NIFTY 50 (NSE)</span>
+                <div className="flex gap-1 h-1">
+                  {[1,2,3].map(i => <div key={i} className="w-1 bg-[#00aaff]/30" />)}
                 </div>
-                <div className="flex items-center justify-between">
-                   <div className="flex flex-col">
-                      <span className="text-xl font-black tracking-tighter text-white">
-                        {latestCrude ? `${(latestCrude.stocksMb / 1000).toFixed(1)}M` : '---'}
-                      </span>
-                      <span className={`text-[9px] font-black ${crudeChange > 0 ? 'text-[#ff3333]' : 'text-[#00ff88]'}`}>
-                        {crudeChange > 0 ? '+' : ''}{(crudeChange).toFixed(1)}k WoW
-                      </span>
-                   </div>
-                   <div className="w-20 h-8 opacity-50">
-                      <svg viewBox="0 0 100 30" className="w-full h-full overflow-visible">
-                         <polyline 
-                           fill="none" 
-                           stroke={crudeChange > 0 ? "#ff3333" : "#00ff88"} 
-                           strokeWidth="2.5" 
-                           points="0,20 20,25 40,15 60,18 80,10 100,5" 
-                         />
-                      </svg>
-                   </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="text-xl font-black tracking-tighter text-white">
+                    {niftyQuote?.price ? Number(niftyQuote.price).toLocaleString('en-IN', { maximumFractionDigits: 2 }) : '---'}
+                  </span>
+                  <span className={`text-[9px] font-black ${(niftyQuote?.change ?? 0) >= 0 ? 'text-[#00ff88]' : 'text-[#ff3333]'}`}>
+                    {formatBloombergChange(niftyQuote?.change)} DoD
+                  </span>
                 </div>
-                <div className="flex justify-between items-center text-[8px] text-[#444] font-bold uppercase">
-                  <span>LAST_UPDATE: {latestCrude?.period || 'N/A'}</span>
-                  <span>EIA_FEED_01</span>
+                <div className="w-20 h-7 opacity-75">
+                  <svg viewBox="0 0 100 30" className="w-full h-full overflow-visible">
+                    <polyline 
+                      fill="none" 
+                      stroke={(niftyQuote?.change ?? 0) >= 0 ? "#00ff88" : "#ff3333"} 
+                      strokeWidth="2" 
+                      points={getSparklineSvgPoints(niftyQuote?.sparkline)} 
+                    />
+                  </svg>
                 </div>
-             </div>
+              </div>
+              <div className="flex justify-between items-center text-[8px] text-[#444] font-bold uppercase mt-1">
+                <span>{niftyQuote?.lastUpdated ? new Date(niftyQuote.lastUpdated).toLocaleTimeString() : 'LIVE'}</span>
+                <span>NSE_TICKER_01</span>
+              </div>
+            </div>
 
-             {/* Nat Gas */}
-             <div 
-               onClick={() => handleItemClick('US Nat Gas Storage')}
-               className={`flex flex-col gap-2 cursor-pointer p-3 rounded-none transition-all border ${analyzing === 'US Nat Gas Storage' ? 'border-[#00aaff] bg-[#00aaff]/5 ring-1 ring-[#00aaff]/20' : 'border-[#222] bg-[#050505] hover:border-[#444]'}`}
-             >
-                <div className="flex items-center justify-between">
-                  <span className="text-[9px] text-[#888] uppercase font-black tracking-widest">US NAT GAS (BCF)</span>
+            {/* BSE SENSEX */}
+            <div 
+              onClick={() => handleItemClick('BSE SENSEX 30')}
+              className={`flex flex-col gap-2 cursor-pointer p-3 rounded-none transition-all border ${analyzing === 'BSE SENSEX 30' ? 'border-[#00aaff] bg-[#00aaff]/5 ring-1 ring-[#00aaff]/20' : 'border-[#222] bg-[#050505] hover:border-[#444]'}`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[9px] text-[#888] uppercase font-black tracking-widest">BSE SENSEX (30)</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="text-xl font-black tracking-tighter text-white">
+                    {sensexQuote?.price ? Number(sensexQuote.price).toLocaleString('en-IN', { maximumFractionDigits: 2 }) : '---'}
+                  </span>
+                  <span className={`text-[9px] font-black ${(sensexQuote?.change ?? 0) >= 0 ? 'text-[#00ff88]' : 'text-[#ff3333]'}`}>
+                    {formatBloombergChange(sensexQuote?.change)} DoD
+                  </span>
                 </div>
-                <div className="flex items-center justify-between">
-                   <div className="flex flex-col">
-                      <span className="text-xl font-black tracking-tighter text-white">
-                        {latestGas?.storBcf || '---'} Bcf
-                      </span>
-                      <span className={`text-[9px] font-black ${gasChange > 0 ? 'text-[#ff3333]' : 'text-[#00ff88]'}`}>
-                        {gasChange > 0 ? '+' : ''}{gasChange} Bcf WoW
-                      </span>
-                   </div>
-                   <div className="w-20 h-8 opacity-50">
-                      <svg viewBox="0 0 100 30" className="w-full h-full overflow-visible">
-                         <polyline 
-                           fill="none" 
-                           stroke={gasChange > 0 ? "#ff3333" : "#00ff88"} 
-                           strokeWidth="2.5" 
-                           points="0,5 20,12 40,25 60,28 80,22 100,20" 
-                         />
-                      </svg>
-                   </div>
+                <div className="w-20 h-7 opacity-75">
+                  <svg viewBox="0 0 100 30" className="w-full h-full overflow-visible">
+                    <polyline 
+                      fill="none" 
+                      stroke={(sensexQuote?.change ?? 0) >= 0 ? "#00ff88" : "#ff3333"} 
+                      strokeWidth="2" 
+                      points={getSparklineSvgPoints(sensexQuote?.sparkline)} 
+                    />
+                  </svg>
                 </div>
-                <div className="flex justify-between items-center text-[8px] text-[#444] font-bold uppercase">
-                  <span>LAST_UPDATE: {latestGas?.period || 'N/A'}</span>
-                  <span>EIA_FEED_02</span>
-                </div>
-             </div>
+              </div>
+              <div className="flex justify-between items-center text-[8px] text-[#444] font-bold uppercase mt-1">
+                <span>{sensexQuote?.lastUpdated ? new Date(sensexQuote.lastUpdated).toLocaleTimeString() : 'LIVE'}</span>
+                <span>BSE_TICKER_02</span>
+              </div>
+            </div>
 
-             {/* EU Gas */}
-             <div 
-               onClick={() => handleItemClick('EU Gas Storage')}
-               className={`flex flex-col gap-2 cursor-pointer p-3 rounded-none transition-all border ${analyzing === 'EU Gas Storage' ? 'border-[#00aaff] bg-[#00aaff]/5 ring-1 ring-[#00aaff]/20' : 'border-[#222] bg-[#050505] hover:border-[#444]'}`}
-             >
-                <div className="flex items-center justify-between">
-                  <span className="text-[9px] text-[#888] uppercase font-black tracking-widest">EU STORAGE (FILL %)</span>
-                  <div className={`px-1.5 py-0.5 text-[8px] font-black rounded-sm ${euGasStorage?.trend === 'stable' ? 'bg-[#00aaff]/10 text-[#00aaff] border border-[#00aaff]/30' : 'bg-[#ff3333]/10 text-[#ff3333] border border-[#ff3333]/30'}`}>
-                    {euGasStorage?.trend?.toUpperCase() || 'NORMAL'}
-                  </div>
+            {/* BANK NIFTY */}
+            <div 
+              onClick={() => handleItemClick('NIFTY BANK Sector Index')}
+              className={`flex flex-col gap-2 cursor-pointer p-3 rounded-none transition-all border ${analyzing === 'NIFTY BANK Sector Index' ? 'border-[#00aaff] bg-[#00aaff]/5 ring-1 ring-[#00aaff]/20' : 'border-[#222] bg-[#050505] hover:border-[#444]'}`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[9px] text-[#888] uppercase font-black tracking-widest">BANK NIFTY</span>
+                <div className={`px-1 py-0.2 text-[7px] font-black rounded-sm ${(bankNiftyQuote?.change ?? 0) >= 0 ? 'bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/30' : 'bg-[#ff3333]/10 text-[#ff3333] border border-[#ff3333]/30'}`}>
+                  {(bankNiftyQuote?.change ?? 0) >= 0 ? 'BULL' : 'BEAR'}
                 </div>
-                <div className="flex items-center justify-between">
-                   <div className="flex flex-col">
-                      <div className="flex items-baseline gap-2">
-                         <span className="text-xl font-black tracking-tighter text-white">
-                           {euGasStorage?.fillPct ? `${euGasStorage.fillPct.toFixed(1)}%` : '---'}
-                         </span>
-                         <span className="text-[9px] font-black text-[#00ff88]">
-                           {euGasStorage?.fillPctChange1d ? `+${euGasStorage.fillPctChange1d.toFixed(2)}%` : '---'} 1d
-                         </span>
-                      </div>
-                      <span className="text-[8px] text-[#555] font-bold">DAYS_SUPPLY: {euGasStorage?.gasDaysConsumption || '---'}d</span>
-                   </div>
-                   <div className="w-12 h-12 relative">
-                      <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                        <circle cx="18" cy="18" r="16" fill="none" stroke="#222" strokeWidth="4" />
-                        <circle 
-                          cx="18" cy="18" r="16" 
-                          fill="none" stroke="#00aaff" strokeWidth="4" 
-                          strokeDasharray={`${euGasStorage?.fillPct || 0}, 100`} 
-                          strokeLinecap="butt"
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Activity className="w-4 h-4 text-[#00aaff] opacity-30 animate-pulse" />
-                      </div>
-                   </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="text-xl font-black tracking-tighter text-white">
+                    {bankNiftyQuote?.price ? Number(bankNiftyQuote.price).toLocaleString('en-IN', { maximumFractionDigits: 2 }) : '---'}
+                  </span>
+                  <span className={`text-[9px] font-black ${(bankNiftyQuote?.change ?? 0) >= 0 ? 'text-[#00ff88]' : 'text-[#ff3333]'}`}>
+                    {formatBloombergChange(bankNiftyQuote?.change)}
+                  </span>
                 </div>
-             </div>
+                <div className="w-20 h-7 opacity-75">
+                  <svg viewBox="0 0 100 30" className="w-full h-full overflow-visible">
+                    <polyline 
+                      fill="none" 
+                      stroke={(bankNiftyQuote?.change ?? 0) >= 0 ? "#00ff88" : "#ff3333"} 
+                      strokeWidth="2" 
+                      points={getSparklineSvgPoints(bankNiftyQuote?.sparkline)} 
+                    />
+                  </svg>
+                </div>
+              </div>
+              <div className="flex justify-between items-center text-[8px] text-[#555] font-bold mt-1">
+                <span>PREV: {bankNiftyQuote?.previousClose ? Number(bankNiftyQuote.previousClose).toLocaleString('en-IN', { maximumFractionDigits: 0 }) : '---'}</span>
+                <span>NSE_SECTOR</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

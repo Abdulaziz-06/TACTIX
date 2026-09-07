@@ -10,23 +10,23 @@ interface StreamConfig {
 
 const STREAMS: StreamConfig[] = [
   {
-    url: 'https://www.youtube.com/watch?v=-zGuR1qVKrU',
-    label: 'Live Feed Alpha',
+    url: 'https://www.youtube.com/watch?v=gCNeDWCI0vo', // Al Jazeera English 24/7 Live
+    label: 'Al Jazeera World News',
     channel: 'CH-01',
   },
   {
-    url: 'https://www.youtube.com/watch?v=gmtlJ_m2r5A',
-    label: 'Live Feed Bravo',
+    url: 'https://www.youtube.com/watch?v=cjBx-ueoSWc', // India Today 24x7 Live
+    label: 'India Today Live (IND)',
     channel: 'CH-02',
   },
   {
-    url: 'https://www.youtube.com/watch?v=fIurYTprwzg',
-    label: 'Live Feed Charlie',
+    url: 'https://www.youtube.com/watch?v=fIurYTprwzg', // Associated Press / Global Geopolitics
+    label: 'Associated Press Global',
     channel: 'CH-03',
   },
   {
-    url: 'https://www.youtube.com/watch?v=FGUKbzulB_Y',
-    label: 'Live Feed Delta',
+    url: 'https://www.youtube.com/watch?v=hCk2MSkhIeQ', // NDTV India 24x7 Live
+    label: 'NDTV India Live (IND)',
     channel: 'CH-04',
   },
 ]
@@ -39,57 +39,31 @@ interface FeedCellProps {
 }
 
 function FeedCell({ stream, index, onExpand, expanded }: FeedCellProps) {
-  const [error, setError]   = useState(false)
   const [ready, setReady]   = useState(false)
   const [muted, setMuted]   = useState(true)
 
+  // Extract YouTube ID cleanly
+  const videoId = stream.url.includes('v=') ? stream.url.split('v=')[1]?.split('&')[0] : stream.url;
+  const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=${muted ? 1 : 0}&controls=0&modestbranding=1&rel=0&playsinline=1&enablejsapi=1`;
+
   return (
-    <div className="relative group overflow-hidden rounded-xl bg-black border border-white/5 hover:border-white/20 transition-all duration-300">
+    <div className="relative group overflow-hidden rounded-xl bg-black border border-white/5 hover:border-white/20 transition-all duration-300 aspect-video">
       {/* Loading shimmer */}
-      {!ready && !error && (
+      {!ready && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/90 gap-1.5">
           <div className="w-4 h-4 border-2 border-white/15 border-t-white/60 rounded-full animate-spin" />
           <span className="text-[9px] text-white/30 font-mono uppercase tracking-widest">{stream.channel}</span>
         </div>
       )}
 
-      {/* Error fallback */}
-      {error && (
-        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/95 gap-1">
-          <span className="text-[18px]">📡</span>
-          <span className="text-[9px] text-white/30 font-mono">{stream.channel} OFFLINE</span>
-          <button
-            onClick={() => setError(false)}
-            className="mt-1 text-[9px] px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-white/60 transition-colors"
-          >
-            Retry
-          </button>
-        </div>
-      )}
-
-      {!error && (
-        <ReactPlayer
-          url={stream.url}
-          width="100%"
-          height="100%"
-          playing={true}
-          muted={muted}
-          onReady={() => setReady(true)}
-          onError={() => setError(true)}
-          config={{
-            youtube: {
-              playerVars: {
-                autoplay: 1,
-                mute: 1,
-                modestbranding: 1,
-                rel: 0,
-                controls: 0,
-              },
-            },
-          }}
-          style={{ position: 'absolute', inset: 0 }}
-        />
-      )}
+      <iframe
+        src={embedUrl}
+        title={stream.label}
+        className="w-full h-full absolute inset-0 border-0 pointer-events-auto"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowFullScreen
+        onLoad={() => setReady(true)}
+      />
 
       {/* HUD overlay */}
       <div className="absolute inset-0 z-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">

@@ -37,6 +37,11 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
       },
+      fontFamily: {
+        sans: ['"Google Sans"', '"Google Sans Text"', 'system-ui', '-apple-system', 'sans-serif'],
+        display: ['"Google Sans"', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

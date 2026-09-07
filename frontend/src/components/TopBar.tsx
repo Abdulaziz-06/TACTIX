@@ -20,22 +20,6 @@ export default function TopBar() {
             REAL-TIME DATA FEED | V0.1
           </span>
         </div>
-        
-        {/* Cluster Stats */}
-        <div className="flex items-center gap-6 border-l border-white/10 pl-6 h-8">
-          <div className="flex flex-col">
-             <span className="text-[10px] uppercase text-muted-foreground tracking-tighter">Conflict</span>
-             <span className="text-xs font-mono font-bold text-red-500">24 ACTIVE</span>
-          </div>
-          <div className="flex flex-col">
-             <span className="text-[10px] uppercase text-muted-foreground tracking-tighter">Economic</span>
-             <span className="text-xs font-mono font-bold text-green-500">STABLE</span>
-          </div>
-          <div className="flex flex-col">
-             <span className="text-[10px] uppercase text-muted-foreground tracking-tighter">Signals</span>
-             <span className="text-xs font-mono font-bold text-blue-500">1400/h</span>
-          </div>
-        </div>
       </div>
 
       <div className="flex items-center gap-6 h-full">
