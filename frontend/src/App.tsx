@@ -6,7 +6,6 @@ import MapView from './components/MapView'
 import ControlPanel from './components/ControlPanel'
 import RightPanels from './components/RightPanels'
 import TopBar from './components/TopBar'
-import NodeExplorer from './components/NodeExplorer'
 import CommodityPanel from './components/CommodityPanel'
 import InsightsPanel from './components/InsightsPanel'
 import { Search, BarChart2, TrendingUp, Activity, Anchor, MessageSquare, Send, Zap, AlertCircle, Shield, Box } from 'lucide-react'
@@ -47,24 +46,6 @@ class MapErrorBoundary extends Component<{ children: ReactNode }, { hasError: bo
 
 // ─── Page: Dashboard (default) ───────────────────────────────────────────────
 function DashboardPage() {
-  const { setActivePage, setPendingQuery } = useDashboardStore()
-  const [searchVal, setSearchVal] = React.useState('')
-
-  const handleAIClick = () => {
-    const topic = searchVal.trim()
-    if (topic) {
-      setPendingQuery(topic)
-      setActivePage('nexus-query')
-    } else {
-      // Navigate with no pre-filled query
-      setActivePage('nexus-query')
-    }
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') handleAIClick()
-  }
-
   return (
     <div className="relative flex-1 flex">
       {/* Main Map */}
@@ -73,42 +54,8 @@ function DashboardPage() {
           <MapView />
         </MapErrorBoundary>
 
-        {/* Search Bar Overlay */}
-        <div className="absolute top-8 left-1/2 -translate-x-1/2 w-[min(90%,580px)] z-40">
-          <div className="glass-darker p-2 rounded-3xl flex items-center gap-4 backdrop-blur-3xl border border-white/10 shadow-2xl group transition-all hover:scale-[1.01] duration-300">
-            <div className="pl-4">
-              <Search className="w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-            </div>
-            <input
-              id="dashboard-search-input"
-              value={searchVal}
-              onChange={e => setSearchVal(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Type a topic or ask intelligence agent…"
-              className="flex-1 bg-transparent border-none outline-none text-sm placeholder:text-muted-foreground py-2 font-medium tracking-tight h-10"
-              onFocus={(e) => (e.target.placeholder = '')}
-              onBlur={(e) => (e.target.placeholder = 'Type a topic or ask intelligence agent…')}
-            />
-            <div className="flex items-center gap-2 pr-2">
-              <kbd className="hidden sm:inline-flex h-6 select-none items-center gap-1 rounded bg-white/10 px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
-                <span className="text-xs">⌘</span>K
-              </kbd>
-              <motion.button
-                id="dashboard-ai-btn"
-                onClick={handleAIClick}
-                whileTap={{ scale: 0.92 }}
-                whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(var(--primary), 0.5)' }}
-                className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground font-black shadow-lg transition-all cursor-pointer select-none"
-                title="Analyse with AI"
-              >
-                <span className="text-[10px]">AI</span>
-              </motion.button>
-            </div>
-          </div>
-        </div>
-
         {/* Status Badge */}
-        <div className="absolute top-24 left-8 z-30">
+        <div className="absolute top-8 left-8 z-30">
           <div className="glass p-3 rounded-2xl border border-white/5 flex flex-col gap-2 scale-90 origin-top-left group">
             <div className="flex items-center gap-3 opacity-50 group-hover:opacity-100 transition-opacity">
               <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
@@ -125,9 +72,8 @@ function DashboardPage() {
           </div>
         </div>
 
-        {/* Control panel + node explorer anchored inside the map panel */}
+        {/* Control panel anchored inside the map panel */}
         <ControlPanel />
-        <NodeExplorer />
       </div>
 
       {/* Right Side Panels */}

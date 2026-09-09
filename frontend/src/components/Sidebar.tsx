@@ -1,14 +1,12 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { LayoutDashboard, Map as MapIcon, Box, BarChart2, MessageSquare, Anchor, Shield, ChevronLeft, ChevronRight, Cpu, Activity, Zap, Globe } from 'lucide-react'
+import { LayoutDashboard, Map as MapIcon, Box, MessageSquare, Shield, ChevronLeft, ChevronRight, Cpu, Activity, Zap, Globe } from 'lucide-react'
 import { useDashboardStore, ActivePage } from '../hooks/use-dashboard-store'
 
 const NAV_ITEMS: { id: ActivePage; icon: React.ElementType; label: string }[] = [
   { id: 'dashboard',    icon: LayoutDashboard, label: 'OVERVIEW' },
   { id: 'map',          icon: Globe,          label: 'GEO-INT MAP' },
   { id: 'commodities',  icon: Box,              label: 'NAT-CALAMITIES' },
-  { id: 'indices',      icon: BarChart2,        label: 'MARKET MATRIX' },
-  { id: 'nexus',        icon: Anchor,           label: 'NEXUS NODE' },
   { id: 'nexus-query',  icon: MessageSquare,    label: 'AI-QUERY' },
 ]
 
